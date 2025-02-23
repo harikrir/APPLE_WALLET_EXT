@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="https://protect.checkpoint.com/v2/r02/___http://apache.org/cordova/ns/plugins/1.0"___.Y3AxZTphaGxpdW5pdGVkYmFuazpjOm86OGI0NzI2Nzc3MmI4MzU5NTQxYmQyNTliNjlkNzFiNDI6NzpkNTJmOmQ3N2UwZTAzNjlkNzhlNDNiMGI3Njk4YjI2ZWE5MTc5Y2QwNWRjMzVjMGNhNjk4MzEyNmRmODllNTU4YjRmZTE6dDpUOk4;
+        id="cordova-plugin-myapplewallet"
+        version="0.0.1">
+    <name>MyAppleWalletPlugin</name>
+    <description>Cordova Plugin for Apple Wallet Integration with External Authentication</description>
+    <license>MIT</license>
+    <keywords>cordova,apple,wallet,external-authentication</keywords>
+    <js-module src="www/MyAppleWalletPlugin.js" name="MyAppleWalletPlugin">
+        <clobbers target="MyAppleWalletPlugin" />
+    </js-module>
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="MyAppleWalletPlugin">
+                <param name="ios-package" value="MyAppleWalletPlugin" />
+            </feature>
+        </config-file>
+        <source-file src="src/ios/MyAppleWalletPlugin.m" />
+        <header-file src="src/ios/MyAppleWalletPlugin.h" />
+        <framework src="PassKit.framework" />
+        <framework src="UIKit.framework" />
+        <config-file target="*-Info.plist" parent="NSApplePayUsageDescription">
+            <string>We need access to Apple Pay to add your card to Wallet.</string>
+        </config-file>
+    </platform>
+</plugin>
