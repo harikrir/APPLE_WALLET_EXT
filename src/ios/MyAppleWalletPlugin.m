@@ -47,7 +47,10 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-#pragma mark - PKAddPaymentPassViewControllerDelegate
+
+
+
+
 
 - (void)addPaymentPassViewController:(PKAddPaymentPassViewController *)controller
  generateRequestWithCertificateChain:(NSArray<NSData *> *)certificates
