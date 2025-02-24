@@ -14,7 +14,7 @@
     }
     
     PKPassLibrary *passLibrary = [[PKPassLibrary alloc] init];
-    PKPass *pass = [passLibrary passWithPassTypeIdentifier:@"your.pass.type.identifier" serialNumber:passIdentifier];
+    PKPass *pass = [passLibrary passWithPassTypeIdentifier:@"pass.com.aub.mobilebanking.uat.bh" serialNumber:passIdentifier];
     
     if (pass) {
         // Update the pass with new data
