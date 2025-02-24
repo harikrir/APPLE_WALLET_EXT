@@ -18,7 +18,7 @@
   "bugs": {
     "url": "https://github.com/your-repo/cordova-plugin-wallet-extension/issues"
   },
-  "homepage": "https://github.com/your-repo/cordova-plugin-wallet-extension%23readme",
+  "homepage": "https://github.com/your-repo/cordova-plugin-wallet-extension#readme",
   "cordova": {
     "id": "cordova-plugin-wallet-extension",
     "platforms": [
