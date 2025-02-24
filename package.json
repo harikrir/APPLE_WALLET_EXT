@@ -10,15 +10,15 @@
     "passkit",
     "ios"
   ],
-  "author": "Your Name <your.email@example.com>",
+  "author": "HARI KRISHNAN <hkrishnan254@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-repo/cordova-plugin-wallet-extension.git"
+    "url": "https://github.com/harikrir/cordova-plugin-wallet-extension.git"
   },
   "bugs": {
-    "url": "https://github.com/your-repo/cordova-plugin-wallet-extension/issues"
+    "url": "https://github.com/harikrir/cordova-plugin-wallet-extension/issues"
   },
-  "homepage": "https://github.com/your-repo/cordova-plugin-wallet-extension#readme",
+  "homepage": "https://github.com/harikrir/cordova-plugin-wallet-extension#readme",
   "cordova": {
     "id": "cordova-plugin-wallet-extension",
     "platforms": [
