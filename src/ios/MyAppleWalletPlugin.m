@@ -1,11 +1,11 @@
 #import "MyAppleWalletPlugin.h"
 #import <PassKit/PassKit.h>
-#import <WatchConnectivity/WatchConnectivity.h>
-#import "AppDelegate.h"
 
-@implementation MyAppleWalletPlugin {
-    CDVInvokedUrlCommand* _pendingCommand;
-}
+@interface MyAppleWalletPlugin () <PKAddPaymentPassViewControllerDelegate>
+@property (nonatomic, strong) CDVInvokedUrlCommand *pendingCommand;
+@end
+
+@implementation MyAppleWalletPlugin
 
 - (void)addCardToWallet:(CDVInvokedUrlCommand*)command {
     NSDictionary* cardDetails = [command.arguments objectAtIndex:0];
@@ -26,10 +26,10 @@
     PKAddPaymentPassViewController *vc = [[PKAddPaymentPassViewController alloc] initWithRequestConfiguration:config delegate:self];
     
     if (vc) {
-        _pendingCommand = command; // Store the command for later use
+        self.pendingCommand = command; // Store the command for later use
         [self.viewController presentViewController:vc animated:YES completion:nil];
     } else {
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to initialize PKAddPaymentPassViewController"];
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Device does not support adding payment passes"];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }
 }
@@ -62,7 +62,7 @@
     // Generate the PKAddPaymentPassRequest
     PKAddPaymentPassRequest *request = [[PKAddPaymentPassRequest alloc] init];
     
-    // Simulate encrypted card data (replace with actual server-side logic)
+    // Replace with actual server-side logic to generate encrypted card data
     request.encryptedPassData = [NSData data]; // Encrypted card data from your server
     request.activationData = [NSData data]; // Activation data from your server
     request.ephemeralPublicKey = [NSData data]; // Ephemeral public key from your server
@@ -77,13 +77,13 @@
     
     if (error) {
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.localizedDescription];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:_pendingCommand.callbackId];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.pendingCommand.callbackId];
     } else {
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:_pendingCommand.callbackId];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.pendingCommand.callbackId];
     }
     
-    _pendingCommand = nil;
+    self.pendingCommand = nil;
 }
 
 @end
