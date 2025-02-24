@@ -1,4 +1,7 @@
 #import "MyAppleWalletPlugin.h"
+#import <PassKit/PassKit.h>
+#import <WatchConnectivity/WatchConnectivity.h>
+#import "AppDelegate.h"
 
 @implementation MyAppleWalletPlugin {
     CDVInvokedUrlCommand* _pendingCommand;
