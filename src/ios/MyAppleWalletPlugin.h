@@ -2,8 +2,5 @@
 #import <PassKit/PassKit.h>
 
 @interface MyAppleWalletPlugin : CDVPlugin <PKAddPaymentPassViewControllerDelegate>
-
-- (void)addCardToWallet:(CDVInvokedUrlCommand*)command;
-- (void)handleExternalAuthentication:(CDVInvokedUrlCommand*)command;
-
+@property (nonatomic, strong) CDVInvokedUrlCommand *pendingCommand;
 @end
