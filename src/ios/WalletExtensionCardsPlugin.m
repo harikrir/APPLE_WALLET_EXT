@@ -1,13 +1,17 @@
 #import "WalletExtensionCardsPlugin.h"
+#import <LocalAuthentication/LocalAuthentication.h>
+#import <PassKit/PassKit.h>
 
-@implementation WalletExtensionCardsPlugin {
-    CDVInvokedUrlCommand* _pendingCommand;
-}
+@interface WalletExtensionCardsPlugin () <PKAddPaymentPassViewControllerDelegate>
+@property (nonatomic, strong) CDVInvokedUrlCommand *pendingCommand;
+@end
+
+@implementation WalletExtensionCardsPlugin
 
 - (void)addCardToWallet:(CDVInvokedUrlCommand*)command {
     NSDictionary* cardDetails = [command.arguments objectAtIndex:0];
     
-    if (!cardDetails) {
+    if (!cardDetails || ![cardDetails isKindOfClass:[NSDictionary class]]) {
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Invalid card details"];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         return;
@@ -23,7 +27,7 @@
     PKAddPaymentPassViewController *vc = [[PKAddPaymentPassViewController alloc] initWithRequestConfiguration:config delegate:self];
     
     if (vc) {
-        _pendingCommand = command; // Store the command for later use
+        self.pendingCommand = command; // Store the command for later use
         [self.viewController presentViewController:vc animated:YES completion:nil];
     } else {
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to initialize PKAddPaymentPassViewController"];
@@ -48,7 +52,7 @@
             }
         }];
     } else {
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Face ID not available"];
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Biometric authentication not available"];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }
 }
@@ -72,19 +76,19 @@
 }
 
 - (void)addPaymentPassViewController:(PKAddPaymentPassViewController *)controller
-          didFinishAddingPaymentPass:(PKPaymentPass *)pass
-                              error:(NSError *)error {
+          didFinishAddingPaymentPass:(nullable PKPaymentPass *)pass
+                              error:(nullable NSError *)error {
     [controller dismissViewControllerAnimated:YES completion:nil];
     
     if (error) {
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.localizedDescription];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:_pendingCommand.callbackId];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.pendingCommand.callbackId];
     } else {
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:_pendingCommand.callbackId];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.pendingCommand.callbackId];
     }
     
-    _pendingCommand = nil;
+    self.pendingCommand = nil;
 }
 
 @end
