@@ -16,7 +16,7 @@
     "ecosystem:cordova",
     "cordova-ios"
   ],
-  "main": "www/appleWallet.js",
+  "main": "www/MyAppleWalletPlugin.js",
   "author": "TOoma | Designes",
   "license": "Apache 2.0",
   "bugs": {
