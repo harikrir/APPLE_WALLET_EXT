@@ -1,9 +1,4 @@
 #import "MyAppleWalletPlugin.h"
-#import <PassKit/PassKit.h>
-
-@interface MyAppleWalletPlugin () <PKAddPaymentPassViewControllerDelegate>
-@property (nonatomic, strong) CDVInvokedUrlCommand *pendingCommand;
-@end
 
 @implementation MyAppleWalletPlugin
 
