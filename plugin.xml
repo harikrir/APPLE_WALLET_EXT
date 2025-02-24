@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-wallet-extension" version="1.0.0">
-    <name>WalletExtensionPlugin</name>
-    <description>Cordova plugin for Wallet Extensions</description>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-wallet-extension-cards" version="1.0.0">
+    <name>WalletExtensionCardsPlugin</name>
+    <description>Cordova plugin for Wallet Extensions to add payment cards</description>
     <license>MIT</license>
-    <keywords>wallet, extension, passkit</keywords>
-    <js-module src="www/WalletExtensionPlugin.js" name="WalletExtensionPlugin">
-        <clobbers target="WalletExtensionPlugin" />
+    <keywords>wallet, extension, passkit, cards, ios</keywords>
+    <js-module src="www/WalletExtensionCardsPlugin.js" name="WalletExtensionCardsPlugin">
+        <clobbers target="WalletExtensionCardsPlugin" />
     </js-module>
     <platform name="ios">
         <config-file target="config.xml" parent="/*">
-            <feature name="WalletExtensionPlugin">
-                <param name="ios-package" value="WalletExtensionPlugin" />
+            <feature name="WalletExtensionCardsPlugin">
+                <param name="ios-package" value="WalletExtensionCardsPlugin" />
             </feature>
         </config-file>
-        <source-file src="src/ios/WalletExtensionPlugin.h" />
-        <source-file src="src/ios/WalletExtensionPlugin.m" />
+        <source-file src="src/ios/WalletExtensionCardsPlugin.h" />
+        <source-file src="src/ios/WalletExtensionCardsPlugin.m" />
         <framework src="PassKit.framework" />
+        <framework src="LocalAuthentication.framework" />
     </platform>
 </plugin>
