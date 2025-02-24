@@ -21,7 +21,7 @@
     PKAddPaymentPassRequestConfiguration *config = [[PKAddPaymentPassRequestConfiguration alloc] initWithEncryptionScheme:PKEncryptionSchemeECC_V2];
     config.cardholderName = cardDetails[@"cardholderName"];
     config.primaryAccountSuffix = cardDetails[@"primaryAccountSuffix"];
-    config.requiresAuthentication = YES; // Enable external authentication
+ //   config.requiresAuthentication = YES; // Enable external authentication
     
     // Create a PKAddPaymentPassViewController
     PKAddPaymentPassViewController *vc = [[PKAddPaymentPassViewController alloc] initWithRequestConfiguration:config delegate:self];
