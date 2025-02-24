@@ -1,40 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-apple-wallet" version="1.0.0">
-    <name>MyAppleWalletPlugin</name>
-    <description>Cordova Plugin for Apple Wallet Integration with External Authentication</description>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-wallet-extension" version="1.0.0">
+    <name>WalletExtensionPlugin</name>
+    <description>Cordova plugin for Wallet Extensions</description>
     <license>MIT</license>
-    <keywords>cordova,apple,wallet,external-authentication</keywords>
-    <js-module src="www/MyAppleWalletPlugin.js" name="MyAppleWalletPlugin">
-        <clobbers target="MyAppleWalletPlugin" />
+    <keywords>wallet, extension, passkit</keywords>
+    <js-module src="www/WalletExtensionPlugin.js" name="WalletExtensionPlugin">
+        <clobbers target="WalletExtensionPlugin" />
     </js-module>
     <platform name="ios">
         <config-file target="config.xml" parent="/*">
-            <feature name="MyAppleWalletPlugin">
-                <param name="ios-package" value="MyAppleWalletPlugin" />
+            <feature name="WalletExtensionPlugin">
+                <param name="ios-package" value="WalletExtensionPlugin" />
             </feature>
         </config-file>
-
-         <config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.payment-pass-provisioning">
-            <true/>
-        </config-file>
-        <config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning">
-            <true/>
-        </config-file>
-        
-        <config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.pass-type-identifiers">
-            <array>
-                <string>com.aub.mobilebanking.bh</string>
-                <string>com.aub.mobilebanking.uat.bh</string>            
-            </array>
-        </config-file>
-        
-        <source-file src="src/ios/MyAppleWalletPlugin.m" />
-        <header-file src="src/ios/MyAppleWalletPlugin.h" />
+        <source-file src="src/ios/WalletExtensionPlugin.h" />
+        <source-file src="src/ios/WalletExtensionPlugin.m" />
         <framework src="PassKit.framework" />
-         <framework src="WatchConnectivity.framework" />
-        <framework src="UIKit.framework" />
-        <config-file target="*-Info.plist" parent="NSApplePayUsageDescription">
-            <string>We need access to Apple Pay to add your card to Wallet.</string>
-        </config-file>
     </platform>
 </plugin>
