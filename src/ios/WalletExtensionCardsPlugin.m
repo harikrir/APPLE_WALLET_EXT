@@ -21,7 +21,7 @@
     PKAddPaymentPassRequestConfiguration *config = [[PKAddPaymentPassRequestConfiguration alloc] initWithEncryptionScheme:PKEncryptionSchemeECC_V2];
     config.cardholderName =   [cardDetails objectForKey:@"cardholderName"];
     config.primaryAccountSuffix =  [cardDetails objectForKey:@"primaryAccountSuffix"];
-     config.localizedDescription = [options objectForKey:@"localizedDescription"];
+     config.localizedDescription = [cardDetails objectForKey:@"localizedDescription"];
     config.paymentNetwork = PKPaymentNetworkMasterCard;
  configuration.primaryAccountIdentifier = [self getCardFPAN:configuration.primaryAccountSuffix];
     
