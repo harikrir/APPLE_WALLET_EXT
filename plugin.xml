@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="https://protect.checkpoint.com/v2/r02/___http://apache.org/cordova/ns/plugins/1.0"___.Y3AxZTphaGxpdW5pdGVkYmFuazpjOm86OGI0NzI2Nzc3MmI4MzU5NTQxYmQyNTliNjlkNzFiNDI6NzpkNTJmOmQ3N2UwZTAzNjlkNzhlNDNiMGI3Njk4YjI2ZWE5MTc5Y2QwNWRjMzVjMGNhNjk4MzEyNmRmODllNTU4YjRmZTE6dDpUOk4;
-        id="cordova-plugin-myapplewallet"
-        version="0.0.1">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-myapplewallet" version="0.0.1">
     <name>MyAppleWalletPlugin</name>
     <description>Cordova Plugin for Apple Wallet Integration with External Authentication</description>
     <license>MIT</license>
