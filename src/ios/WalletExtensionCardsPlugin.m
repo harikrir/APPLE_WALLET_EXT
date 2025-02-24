@@ -21,6 +21,10 @@
     PKAddPaymentPassRequestConfiguration *config = [[PKAddPaymentPassRequestConfiguration alloc] initWithEncryptionScheme:PKEncryptionSchemeECC_V2];
     config.cardholderName =   [cardDetails objectForKey:@"cardholderName"];
     config.primaryAccountSuffix =  [cardDetails objectForKey:@"primaryAccountSuffix"];
+     config.localizedDescription = [options objectForKey:@"localizedDescription"];
+    config.paymentNetwork = PKPaymentNetworkMasterCard;
+ configuration.primaryAccountIdentifier = [self getCardFPAN:configuration.primaryAccountSuffix];
+    
  //   config.requiresAuthentication = YES; // Enable external authentication
     
     // Create a PKAddPaymentPassViewController
@@ -89,6 +93,37 @@
     }
     
     self.pendingCommand = nil;
+}
+
+
+
+
+- (NSString *) getCardFPAN:(NSString *) cardSuffix{
+    
+    PKPassLibrary *passLibrary = [[PKPassLibrary alloc] init];
+    NSArray<PKPass *> *paymentPasses = [passLibrary passesOfType:PKPassTypePayment];
+    for (PKPass *pass in paymentPasses) {
+        PKPaymentPass * paymentPass = [pass paymentPass];
+        if([[paymentPass primaryAccountNumberSuffix] isEqualToString:cardSuffix])
+            return [paymentPass primaryAccountIdentifier];
+    }
+    
+    if (WCSession.isSupported) { // check if the device support to handle an Apple Watch
+        WCSession *session = [WCSession defaultSession];
+        [session setDelegate:self.appDelegate];
+        [session activateSession];
+        
+        if ([session isPaired]) { // Check if the iPhone is paired with the Apple Watch
+            paymentPasses = [passLibrary remotePaymentPasses];
+            for (PKPass *pass in paymentPasses) {
+                PKPaymentPass * paymentPass = [pass paymentPass];
+                if([[paymentPass primaryAccountNumberSuffix] isEqualToString:cardSuffix])
+                    return [paymentPass primaryAccountIdentifier];
+            }
+        }
+    }
+    
+    return nil;
 }
 
 @end
