@@ -1,26 +1,37 @@
 {
-  "name": "cordova-apple-wallet",
-  "version": "3.4.1",
-  "description": "This plugin allows you to add passes and credit cards to Apple Wallet",
+  "name": "cordova-plugin-wallet-extension",
+  "version": "1.0.0",
+  "description": "Cordova plugin for Wallet Extensions to update passes and handle deep links.",
+  "license": "MIT",
+  "keywords": [
+    "cordova",
+    "wallet",
+    "extension",
+    "passkit",
+    "ios"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-repo/cordova-plugin-wallet-extension.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-repo/cordova-plugin-wallet-extension/issues"
+  },
+  "homepage": "https://github.com/your-repo/cordova-plugin-wallet-extension%23readme",
   "cordova": {
-    "id": "cordova-apple-wallet",
+    "id": "cordova-plugin-wallet-extension",
     "platforms": [
       "ios"
     ]
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/tomavic/cordova-apple-wallet.git"
+  "engines": {
+    "cordova": ">=10.0.0",
+    "cordova-ios": ">=6.0.0"
   },
-  "keywords": [
-    "ecosystem:cordova",
-    "cordova-ios"
-  ],
-  "main": "www/MyAppleWalletPlugin.js",
-  "author": "TOoma | Designes",
-  "license": "Apache 2.0",
-  "bugs": {
-    "url": "https://github.com/tomavic/cordova-apple-wallet/issues"
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "homepage": "https://github.com/tomavic/cordova-apple-wallet#readme"
+  "dependencies": {},
+  "devDependencies": {}
 }
