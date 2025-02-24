@@ -1,26 +1,25 @@
 {
-  "name": "cordova-plugin-wallet-extension",
+  "name": "cordova-plugin-wallet-extension-cards",
   "version": "1.0.0",
-  "description": "Cordova plugin for Wallet Extensions to update passes and handle deep links.",
+  "description": "Cordova plugin for Wallet Extensions to add payment cards",
   "license": "MIT",
   "keywords": [
     "cordova",
     "wallet",
     "extension",
     "passkit",
+    "cards",
     "ios"
   ],
   "author": "HARI KRISHNAN <hkrishnan254@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/harikrir/cordova-plugin-wallet-extension.git"
-  },
+    "url": "https://github.com/your-repo/cordova-plugin-wallet-extension-cards.git" },
   "bugs": {
-    "url": "https://github.com/harikrir/cordova-plugin-wallet-extension/issues"
-  },
-  "homepage": "https://github.com/harikrir/cordova-plugin-wallet-extension#readme",
+    "url": "https://github.com/harikrir/cordova-plugin-wallet-extension-cards/issues" },
+  "homepage": "https://github.com/harikrir/cordova-plugin-wallet-extension-cards%23readme",
   "cordova": {
-    "id": "cordova-plugin-wallet-extension",
+    "id": "cordova-plugin-wallet-extension-cards",
     "platforms": [
       "ios"
     ]
