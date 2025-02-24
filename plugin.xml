@@ -31,6 +31,7 @@
         <source-file src="src/ios/MyAppleWalletPlugin.m" />
         <header-file src="src/ios/MyAppleWalletPlugin.h" />
         <framework src="PassKit.framework" />
+         <framework src="WatchConnectivity.framework" />
         <framework src="UIKit.framework" />
         <config-file target="*-Info.plist" parent="NSApplePayUsageDescription">
             <string>We need access to Apple Pay to add your card to Wallet.</string>
