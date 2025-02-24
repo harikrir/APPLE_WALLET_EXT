@@ -97,33 +97,4 @@
 
 
 
-
-- (NSString *) getCardFPAN:(NSString *) cardSuffix{
-    
-    PKPassLibrary *passLibrary = [[PKPassLibrary alloc] init];
-    NSArray<PKPass *> *paymentPasses = [passLibrary passesOfType:PKPassTypePayment];
-    for (PKPass *pass in paymentPasses) {
-        PKPaymentPass * paymentPass = [pass paymentPass];
-        if([[paymentPass primaryAccountNumberSuffix] isEqualToString:cardSuffix])
-            return [paymentPass primaryAccountIdentifier];
-    }
-    
-    if (WCSession.isSupported) { // check if the device support to handle an Apple Watch
-        WCSession *session = [WCSession defaultSession];
-        [session setDelegate:self.appDelegate];
-        [session activateSession];
-        
-        if ([session isPaired]) { // Check if the iPhone is paired with the Apple Watch
-            paymentPasses = [passLibrary remotePaymentPasses];
-            for (PKPass *pass in paymentPasses) {
-                PKPaymentPass * paymentPass = [pass paymentPass];
-                if([[paymentPass primaryAccountNumberSuffix] isEqualToString:cardSuffix])
-                    return [paymentPass primaryAccountIdentifier];
-            }
-        }
-    }
-    
-    return nil;
-}
-
 @end
