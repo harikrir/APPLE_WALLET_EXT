@@ -23,7 +23,7 @@
     config.primaryAccountSuffix =  [cardDetails objectForKey:@"primaryAccountSuffix"];
      config.localizedDescription = [cardDetails objectForKey:@"localizedDescription"];
     config.paymentNetwork = PKPaymentNetworkMasterCard;
- configuration.primaryAccountIdentifier = [self getCardFPAN:configuration.primaryAccountSuffix];
+ config.primaryAccountIdentifier = [self getCardFPAN:configuration.primaryAccountSuffix];
     
  //   config.requiresAuthentication = YES; // Enable external authentication
     
