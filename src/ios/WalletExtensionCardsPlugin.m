@@ -42,46 +42,66 @@
 }
 
 - (void)addCardToWallet:(CDVInvokedUrlCommand *)command {
-    NSDictionary *cardDetails = [command.arguments objectAtIndex:0];
-
-    if (!cardDetails || ![cardDetails isKindOfClass:[NSDictionary class]]) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Invalid card details"];
+  self.isRequestIssued = false;
+    NSLog(@"LOG start startAddPaymentPass");
+    CDVPluginResult* pluginResult;
+    NSArray* arguments = command.arguments;
+    
+    self.transactionCallbackId = nil;
+    self.completionCallbackId = nil;
+    
+    if ([arguments count] != 1){
+        pluginResult =[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"incorrect number of arguments"];
+        [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        return;
-    }
+    } else {
+        // Options
+        NSDictionary* options = [arguments objectAtIndex:0];
+        
+        // encryption scheme to be used (RSA_V2 or ECC_V2)
+        NSString* scheme = [options objectForKey:@"encryptionScheme"];
+        PKEncryptionScheme encryptionScheme = PKEncryptionSchemeRSA_V2;
+        if (scheme != nil) {
+            if([[scheme uppercaseString] isEqualToString:@"RSA_V2"]) {
+                encryptionScheme = PKEncryptionSchemeRSA_V2;
+            }
+            
+            if([[scheme uppercaseString] isEqualToString:@"ECC_V2"]) {
+                encryptionScheme = PKEncryptionSchemeECC_V2;
+            }
+        }
 
-    NSString *cardholderName = [cardDetails objectForKey:@"cardholderName"];
-    NSString *primaryAccountSuffix = [cardDetails objectForKey:@"primaryAccountSuffix"];
-    NSString *localizedDescription = [cardDetails objectForKey:@"localizedDescription"];
-    NSString *paymentNetwork = [cardDetails objectForKey:@"paymentNetwork"];
-
-    if (!cardholderName || !primaryAccountSuffix || !localizedDescription || !paymentNetwork) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Missing required card details"];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        return;
-    }
-
-    // Check if the device supports adding payment passes
-    if (![PKAddPaymentPassViewController canAddPaymentPass]) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Device does not support adding payment passes"];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        return;
-    }
-
-    PKAddPaymentPassRequestConfiguration *config = [[PKAddPaymentPassRequestConfiguration alloc] initWithEncryptionScheme:PKEncryptionSchemeECC_V2];
-    config.cardholderName = cardholderName;
-    config.primaryAccountSuffix = primaryAccountSuffix;
-    config.localizedDescription = localizedDescription;
-    config.paymentNetwork = paymentNetwork;
-    config.primaryAccountIdentifier = [self getCardFPAN:primaryAccountSuffix];
-
-
-
-      self.addPaymentPassModal  = [[PKAddPaymentPassViewController alloc] initWithRequestConfiguration:config delegate:self];
+        PKAddPaymentPassRequestConfiguration* configuration = [[PKAddPaymentPassRequestConfiguration alloc] initWithEncryptionScheme:encryptionScheme];
+        
+        // The name of the person the card is issued to
+        configuration.cardholderName = [options objectForKey:@"cardholderName"];
+        
+        // Last 4/5 digits of PAN. The last four or five digits of the PAN. Presented to the user with dots prepended to indicate that it is a suffix.
+        configuration.primaryAccountSuffix = [options objectForKey:@"primaryAccountSuffix"];
+        
+        // A short description of the card.
+        configuration.localizedDescription = [options objectForKey:@"localizedDescription"];
+        
+        // Filters the device and attached devices that already have this card provisioned. No filter is applied if the parameter is omitted
+        configuration.primaryAccountIdentifier = [self getCardFPAN:configuration.primaryAccountSuffix]; //@"V-3018253329239943005544";//@"";
+        
+        
+        // Filters the networks shown in the introduction view to this single network.
+        NSString* paymentNetwork = [options objectForKey:@"paymentNetwork"];
+        if([[paymentNetwork uppercaseString] isEqualToString:@"VISA"]) {
+            configuration.paymentNetwork = PKPaymentNetworkVisa;
+        }
+        if([[paymentNetwork uppercaseString] isEqualToString:@"MASTERCARD"]) {
+            configuration.paymentNetwork = PKPaymentNetworkMasterCard;
+        }
+         // configuration.requiresAuthentication = YES; 
+         
+        // Present view controller
+        self.addPaymentPassModal = [[PKAddPaymentPassViewController alloc] initWithRequestConfiguration:configuration delegate:self];
 
     if (!self.addPaymentPassModal) {
         NSLog(@"Failed to initialize PKAddPaymentPassViewController. Configuration: %@", config);
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to initialize PKAddPaymentPassViewController"];
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to init PKAddPaymentPassViewController"];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         return;
     }
