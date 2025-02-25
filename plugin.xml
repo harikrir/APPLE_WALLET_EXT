@@ -23,20 +23,7 @@
 
         
 
-        <config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.passkit.pass-presentation-suppression">
-            <true/>
-        </config-file>
-        
-<config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.passkit.pass-presentation-suppression">
-            <true/>
-        </config-file>
-
-<config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.passkit.pass-presentation-suppression">
-            <array>
-                <string>com.aub.mobilebanking.bh</string>
-                 <string>com.aub.mobilebanking.uat.bh</string>             
-            </array>
-        </config-file>
+  
 
 
         
