@@ -10,9 +10,24 @@
     <platform name="ios">
         <config-file target="config.xml" parent="/*">
             <feature name="WalletExtensionCardsPlugin">
-                <param name="ios-package" value="WalletExtensionCardsPlugin" />
+                <param name="ios-package" value="WalletExtensionCardsPlugin" onload="true" />
             </feature>
         </config-file>
+ <config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.payment-pass-provisioning">
+            <true/>
+        </config-file>
+        <config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning">
+            <true/>
+        </config-file>
+        
+        <config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.pass-type-identifiers">
+            <array>
+                <string>com.aub.mobilebanking.bh</string>
+                 <string>com.aub.mobilebanking.uat.bh</string>             
+            </array>
+        </config-file>
+        
+        
         <source-file src="src/ios/WalletExtensionCardsPlugin.h" />
         <source-file src="src/ios/WalletExtensionCardsPlugin.m" />
         <framework src="PassKit.framework" />
