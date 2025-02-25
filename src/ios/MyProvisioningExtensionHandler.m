@@ -13,4 +13,23 @@
     completion(status);
 }
 
+
+- (void)passEntriesWithCompletion:(void (^)(NSArray<PKIssuerProvisioningExtensionPaymentPassEntry *> *passEntries))completion {
+    PKIssuerProvisioningExtensionPaymentPassEntry *entry = [[PKIssuerProvisioningExtensionPaymentPassEntry alloc] init];
+    entry.title = @"Example Card";
+    entry.identifier = @"example-card-identifier";
+    entry.art = [UIImage imageNamed:@"card-art"]; // Ensure this image meets Apple's requirements
+
+    completion(@[entry]);
+}
+
+- (void)remotePassEntriesWithCompletion:(void (^)(NSArray<PKIssuerProvisioningExtensionPaymentPassEntry *> *remotePassEntries))completion {
+    PKIssuerProvisioningExtensionPaymentPassEntry *entry = [[PKIssuerProvisioningExtensionPaymentPassEntry alloc] init];
+    entry.title = @"Example Card";
+    entry.identifier = @"example-card-identifier";
+    entry.art = [UIImage imageNamed:@"card-art"]; // Ensure this image meets Apple's requirements
+
+    completion(@[entry]);
+}
+
 @end
