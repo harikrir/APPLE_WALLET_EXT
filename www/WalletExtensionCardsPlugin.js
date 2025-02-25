@@ -10,6 +10,3 @@ var WalletExtensionCardsPlugin = {
 };
 
 module.exports = WalletExtensionCardsPlugin;
-
-
-
