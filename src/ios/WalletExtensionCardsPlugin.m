@@ -1,7 +1,7 @@
 #import <Cordova/CDV.h>
 #import <PassKit/PassKit.h>
 
-@interface WalletExtensionCardsPlugin : CDVPlugin <PKAddPaymentPassViewControllerDelegate>
+@interface WalletExtensionCardsPlugin  : CDVPlugin <PKAddPaymentPassViewControllerDelegate>
 
 @property (nonatomic, strong) NSString* callbackId;
 
@@ -10,7 +10,7 @@
 
 @end
 
-@implementation WalletExtensionCardsPlugin
+@implementation WalletExtensionCardsPlugin 
 
 - (void)authenticateAndRetrieveCards:(CDVInvokedUrlCommand*)command {
     self.callbackId = command.callbackId;
