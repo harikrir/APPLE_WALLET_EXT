@@ -1,182 +1,132 @@
-#import "WalletExtensionCardsPlugin.h"
-#import <LocalAuthentication/LocalAuthentication.h>
+#import <Cordova/CDV.h>
 #import <PassKit/PassKit.h>
-#import <WatchConnectivity/WatchConnectivity.h>
 
-@interface WalletExtensionCardsPlugin () <PKAddPaymentPassViewControllerDelegate>
-@property (nonatomic, strong) CDVInvokedUrlCommand *pendingCommand;
- @property (nonatomic, retain) UIViewController* addPaymentPassModal;
+@interface WalletExtensionCardsPlugin : CDVPlugin <PKAddPaymentPassViewControllerDelegate>
 
+@property (nonatomic, strong) NSString* callbackId;
 
+- (void)authenticateAndRetrieveCards:(CDVInvokedUrlCommand*)command;
+- (void)addCardToWallet:(CDVInvokedUrlCommand*)command;
 
-
- 
 @end
 
 @implementation WalletExtensionCardsPlugin
 
+- (void)authenticateAndRetrieveCards:(CDVInvokedUrlCommand*)command {
+    self.callbackId = command.callbackId;
 
-
-
-- (NSString *) getCardFPAN:(NSString *) cardSuffix{
-    
-    PKPassLibrary *passLibrary = [[PKPassLibrary alloc] init];
-    NSArray<PKPass *> *paymentPasses = [passLibrary passesOfType:PKPassTypePayment];
-    for (PKPass *pass in paymentPasses) {
-        PKPaymentPass * paymentPass = [pass paymentPass];
-        if([[paymentPass primaryAccountNumberSuffix] isEqualToString:cardSuffix])
-            return [paymentPass primaryAccountIdentifier];
-    }
-    
-    if (WCSession.isSupported) { // check if the device support to handle an Apple Watch
-        WCSession *session = [WCSession defaultSession];
-        [session setDelegate:self.appDelegate];
-        [session activateSession];
-        
-        if ([session isPaired]) { // Check if the iPhone is paired with the Apple Watch
-            paymentPasses = [passLibrary remotePaymentPasses];
-            for (PKPass *pass in paymentPasses) {
-                PKPaymentPass * paymentPass = [pass paymentPass];
-                if([[paymentPass primaryAccountNumberSuffix] isEqualToString:cardSuffix])
-                    return [paymentPass primaryAccountIdentifier];
-            }
-        }
-    }
-    
-    return nil;
-}
-
-- (void)addCardToWallet:(CDVInvokedUrlCommand *)command {
-
-
-    NSLog(@"LOG start startAddPaymentPass");
-    CDVPluginResult* pluginResult;
-    NSArray* arguments = command.arguments;
-    
-  
-    
-    if ([arguments count] != 1){
-        pluginResult =[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"incorrect number of arguments"];
-        [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    } else {
-        // Options
-        NSDictionary* options = [arguments objectAtIndex:0];
-        
-        // encryption scheme to be used (RSA_V2 or ECC_V2)
-        NSString* scheme = [options objectForKey:@"encryptionScheme"];
-        PKEncryptionScheme encryptionScheme = PKEncryptionSchemeRSA_V2;
-        if (scheme != nil) {
-            if([[scheme uppercaseString] isEqualToString:@"RSA_V2"]) {
-                encryptionScheme = PKEncryptionSchemeRSA_V2;
-            }
-            
-            if([[scheme uppercaseString] isEqualToString:@"ECC_V2"]) {
-                encryptionScheme = PKEncryptionSchemeECC_V2;
-            }
-        }
-
-        PKAddPaymentPassRequestConfiguration* configuration = [[PKAddPaymentPassRequestConfiguration alloc] initWithEncryptionScheme:encryptionScheme];
-        
-        // The name of the person the card is issued to
-        configuration.cardholderName = [options objectForKey:@"cardholderName"];
-        
-        // Last 4/5 digits of PAN. The last four or five digits of the PAN. Presented to the user with dots prepended to indicate that it is a suffix.
-        configuration.primaryAccountSuffix = [options objectForKey:@"primaryAccountSuffix"];
-        
-        // A short description of the card.
-        configuration.localizedDescription = [options objectForKey:@"localizedDescription"];
-        
-        // Filters the device and attached devices that already have this card provisioned. No filter is applied if the parameter is omitted
-        configuration.primaryAccountIdentifier = [self getCardFPAN:configuration.primaryAccountSuffix]; //@"V-3018253329239943005544";//@"";
-        
-        
-        // Filters the networks shown in the introduction view to this single network.
-        NSString* paymentNetwork = [options objectForKey:@"paymentNetwork"];
-        if([[paymentNetwork uppercaseString] isEqualToString:@"VISA"]) {
-            configuration.paymentNetwork = PKPaymentNetworkVisa;
-        }
-        if([[paymentNetwork uppercaseString] isEqualToString:@"MASTERCARD"]) {
-            configuration.paymentNetwork = PKPaymentNetworkMasterCard;
-        }
-         // configuration.requiresAuthentication = YES; 
-         
-        // Present view controller
-        self.addPaymentPassModal = [[PKAddPaymentPassViewController alloc] initWithRequestConfiguration:configuration delegate:self];
-        
-       if(!self.addPaymentPassModal) {
-            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Can not init PKAddPaymentPassViewController"];
-            [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    // Authenticate the user using Face ID, Touch ID, or app-specific authentication
+    [self authenticateUserWithCompletion:^(BOOL success, NSError *error) {
+        if (success) {
+            // Retrieve the list of cards from the issuer app
+            [self retrieveCardsWithCompletion:^(NSArray *cards, NSError *error) {
+                CDVPluginResult* pluginResult = nil;
+                if (error) {
+                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.localizedDescription];
+                } else {
+                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:cards];
+                }
+                [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
+            }];
         } else {
-         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
-        self.pendingCommand = command; // Store the command for later use
-        [self.viewController presentViewController:self.addPaymentPassModal animated:YES completion:nil];
-
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.localizedDescription];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
         }
-    
-    }
-
- 
+    }];
 }
 
+- (void)addCardToWallet:(CDVInvokedUrlCommand*)command {
+    self.callbackId = command.callbackId;
+    NSDictionary* cardDetails = [command.arguments objectAtIndex:0];
 
-- (void)authenticateWithFaceID:(CDVInvokedUrlCommand*)command {
-    LAContext *context = [[LAContext alloc] init];
-    NSError *error = nil;
-    
-    if ([context canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics error:&error]) {
-        [context evaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics
-                localizedReason:@"Authenticate to add card to Wallet"
-                          reply:^(BOOL success, NSError *error) {
-            if (success) {
-                CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-                [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-            } else {
-                CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.localizedDescription];
-                [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-            }
-        }];
-    } else {
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Biometric authentication not available"];
+    if (![PKAddPaymentPassViewController canAddPaymentPass]) {
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Cannot add payment pass."];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        return;
     }
+
+    PKAddPaymentPassRequestConfiguration *config = [[PKAddPaymentPassRequestConfiguration alloc] initWithEncryptionScheme:PKEncryptionSchemeRSA_V2];
+    config.cardholderName = cardDetails[@"cardholderName"];
+    config.primaryAccountSuffix = cardDetails[@"primaryAccountSuffix"];
+    config.localizedDescription = cardDetails[@"localizedDescription"];
+
+    PKAddPaymentPassViewController *vc = [[PKAddPaymentPassViewController alloc] initWithRequestConfiguration:config delegate:self];
+    [self.viewController presentViewController:vc animated:YES completion:nil];
 }
 
 #pragma mark - PKAddPaymentPassViewControllerDelegate
 
 - (void)addPaymentPassViewController:(PKAddPaymentPassViewController *)controller
- generateRequestWithCertificateChain:(NSArray<NSData *> *)certificates
-                               nonce:(NSData *)nonce
-                      nonceSignature:(NSData *)nonceSignature
-                   completionHandler:(void (^)(PKAddPaymentPassRequest *request))handler {
-    // Generate the PKAddPaymentPassRequest
+    generateRequestWithCertificateChain:(NSArray<NSData *> *)certificates
+    nonce:(NSData *)nonce
+    nonceSignature:(NSData *)nonceSignature
+    completionHandler:(void (^)(PKAddPaymentPassRequest *request))handler {
+
+    // Generate the request here and call the handler with the request
     PKAddPaymentPassRequest *request = [[PKAddPaymentPassRequest alloc] init];
-    
-    // Replace with actual server-side logic to generate encrypted card data
-    request.encryptedPassData = [NSData data]; // Encrypted card data from your server
-    request.activationData = [NSData data]; // Activation data from your server
-    request.ephemeralPublicKey = [NSData data]; // Ephemeral public key from your server
-    
     handler(request);
 }
 
 - (void)addPaymentPassViewController:(PKAddPaymentPassViewController *)controller
-          didFinishAddingPaymentPass:(nullable PKPaymentPass *)pass
-                              error:(nullable NSError *)error {
-    [controller dismissViewControllerAnimated:YES completion:nil];
-    
+    didFinishAddingPaymentPass:(PKPaymentPass *)pass
+    error:(NSError *)error {
+
+    [self.viewController dismissViewControllerAnimated:YES completion:nil];
+
+    CDVPluginResult* pluginResult = nil;
     if (error) {
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.localizedDescription];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.pendingCommand.callbackId];
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.localizedDescription];
     } else {
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.pendingCommand.callbackId];
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Payment pass added successfully."];
     }
-    
-    self.pendingCommand = nil;
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
 }
 
+- (void)authenticateUserWithCompletion:(void (^)(BOOL success, NSError *error))completion {
+    // Implement authentication logic here (e.g., Face ID, Touch ID, or app-specific authentication)
+    // For demonstration, we'll assume authentication is always successful
+    completion(YES, nil);
+}
 
+- (void)retrieveCardsWithCompletion:(void (^)(NSArray *cards, NSError *error))completion {
+    // Implement logic to retrieve cards from the issuer app
+    // For demonstration, we'll return a sample list of cards
+    NSArray *cards = @[
+        @{@"cardholderName": @"John Doe", @"primaryAccountSuffix": @"1234", @"localizedDescription": @"Example Card 1"},
+        @{@"cardholderName": @"Jane Smith", @"primaryAccountSuffix": @"5678", @"localizedDescription": @"Example Card 2"}
+    ];
+    completion(cards, nil);
+}
+
+@end
+
+// Implement PKIssuerProvisioningExtensionHandler
+@interface MyProvisioningExtensionHandler : PKIssuerProvisioningExtensionHandler
+@end
+
+@implementation MyProvisioningExtensionHandler
+
+- (void)statusWithCompletion:(void (^)(PKIssuerProvisioningExtensionStatus *status))completion {
+    PKIssuerProvisioningExtensionStatus *status = [[PKIssuerProvisioningExtensionStatus alloc] init];
+    status.passEntriesAvailable = YES; // Indicate that a payment pass is available
+    status.remotePassEntriesAvailable = YES; // Indicate that a payment pass is available for Apple Watch
+    status.requiresAuthentication = YES; // Indicate that authentication is required
+    completion(status);
+}
+
+@end
+
+// Implement PKIssuerProvisioningExtensionAuthorizationProviding
+@interface MyAuthorizationViewController : UIViewController <PKIssuerProvisioningExtensionAuthorizationProviding>
+@end
+
+@implementation MyAuthorizationViewController
+
+- (void)authorizeWithCompletionHandler:(void (^)(PKIssuerProvisioningExtensionAuthorizationResult *result))completionHandler {
+    // Perform authentication (e.g., Face ID, Touch ID, or app-specific authentication)
+    PKIssuerProvisioningExtensionAuthorizationResult *result = [[PKIssuerProvisioningExtensionAuthorizationResult alloc] init];
+    result.authorized = YES;
+    completionHandler(result);
+}
 
 @end
