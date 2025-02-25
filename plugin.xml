@@ -38,6 +38,8 @@
         
         <source-file src="src/ios/WalletExtensionCardsPlugin.h" />
         <source-file src="src/ios/WalletExtensionCardsPlugin.m" />
+         <source-file src="src/ios/MyProvisioningExtensionHandler.m" />
+        <source-file src="src/ios/MyAuthorizationViewController.m" />
         <framework src="PassKit.framework" />
         <framework src="LocalAuthentication.framework" />
     </platform>
