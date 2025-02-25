@@ -104,16 +104,16 @@
         // Present view controller
         self.addPaymentPassModal = [[PKAddPaymentPassViewController alloc] initWithRequestConfiguration:configuration delegate:self];
         
-        if(!self.addPaymentPassModal) {
-            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Can not init PKAddPaymentPassViewController"];
-            [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        } else {
-         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
-        self.pendingCommand = command; // Store the command for later use
-        [self.viewController presentViewController:self.addPaymentPassModal animated:YES completion:nil];
+        if (!self.addPaymentPassModal) {
+        NSLog(@"Failed to initialize PKAddPaymentPassViewController. Configuration: %@", config);
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to init PKAddPaymentPassViewController"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        return;
+    }
 
-        }
+    self.pendingCommand = command;
+    [self.viewController presentViewController:self.addPaymentPassModal animated:YES completion:nil];
+    
     }
 
  
