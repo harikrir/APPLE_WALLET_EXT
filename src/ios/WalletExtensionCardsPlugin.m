@@ -1,15 +1,12 @@
 #import <Cordova/CDV.h>
 #import <PassKit/PassKit.h>
-#import "Foundation/Foundation.h"
-#import "Cordova/CDV.h"
+#import <Foundation/Foundation.h>
 #import <Cordova/CDVPlugin.h>
-#import <PassKit/PassKit.h>
 #import <WatchConnectivity/WatchConnectivity.h>
 
 @interface WalletExtensionCardsPlugin : CDVPlugin <PKAddPaymentPassViewControllerDelegate>
 
-  @property (nonatomic, retain) UIViewController* addPaymentPassModal;
-
+@property (nonatomic, retain) PKAddPaymentPassViewController* addPaymentPassModal;
 @property (nonatomic, strong) NSString* callbackId;
 
 - (void)authenticateAndRetrieveCards:(CDVInvokedUrlCommand*)command;
@@ -57,8 +54,8 @@
     config.primaryAccountSuffix = cardDetails[@"primaryAccountSuffix"];
     config.localizedDescription = cardDetails[@"localizedDescription"];
 
-    addPaymentPassModal *vc = [[PKAddPaymentPassViewController alloc] initWithRequestConfiguration:config delegate:self];
-    [self.viewController presentViewController:vc animated:YES completion:nil];
+    self.addPaymentPassModal = [[PKAddPaymentPassViewController alloc] initWithRequestConfiguration:config delegate:self];
+    [self.viewController presentViewController:self.addPaymentPassModal animated:YES completion:nil];
 }
 
 #pragma mark - PKAddPaymentPassViewControllerDelegate
@@ -82,9 +79,9 @@
 
     CDVPluginResult* pluginResult = nil;
     if (error) {
-        pluginResult = [CDVPluginResult resultWithStatus:CDommandStatus_ERROR messageAsString:error.localizedDescription];
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.localizedDescription];
     } else {
-        pluginResult = [CDVPluginResult resultWithStatus:CDommandStatus_OK messageAsString:@"Payment pass added successfully."];
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Payment pass added successfully."];
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
 }
