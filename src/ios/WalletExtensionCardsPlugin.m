@@ -40,36 +40,53 @@
     return nil;
 }
 
-- (void)addCardToWallet:(CDVInvokedUrlCommand*)command {
-    NSDictionary* cardDetails = [command.arguments objectAtIndex:0];
-    
+- (void)addCardToWallet:(CDVInvokedUrlCommand *)command {
+    NSDictionary *cardDetails = [command.arguments objectAtIndex:0];
+
     if (!cardDetails || ![cardDetails isKindOfClass:[NSDictionary class]]) {
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Invalid card details"];
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Invalid card details"];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         return;
     }
-    
-    // Create a PKAddPaymentPassRequestConfiguration
-    PKAddPaymentPassRequestConfiguration *config = [[PKAddPaymentPassRequestConfiguration alloc] initWithEncryptionScheme:PKEncryptionSchemeECC_V2];
-    config.cardholderName =   [cardDetails objectForKey:@"cardholderName"];
-    config.primaryAccountSuffix =  [cardDetails objectForKey:@"primaryAccountSuffix"];
-     config.localizedDescription = [cardDetails objectForKey:@"localizedDescription"];
-    config.paymentNetwork = PKPaymentNetworkMasterCard;
- config.primaryAccountIdentifier = [self getCardFPAN:config.primaryAccountSuffix];
-    
- //   config.requiresAuthentication = YES; // Enable external authentication
-    
-    // Create a PKAddPaymentPassViewController
-    PKAddPaymentPassViewController *vc = [[PKAddPaymentPassViewController alloc] initWithRequestConfiguration:config delegate:self];
-    
-    if (vc) {
-        self.pendingCommand = command; // Store the command for later use
-        [self.viewController presentViewController:vc animated:YES completion:nil];
-    } else {
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to initialize PKAddPaymentPassViewController"];
+
+    NSString *cardholderName = [cardDetails objectForKey:@"cardholderName"];
+    NSString *primaryAccountSuffix = [cardDetails objectForKey:@"primaryAccountSuffix"];
+    NSString *localizedDescription = [cardDetails objectForKey:@"localizedDescription"];
+    NSString *paymentNetwork = [cardDetails objectForKey:@"paymentNetwork"];
+
+    if (!cardholderName || !primaryAccountSuffix || !localizedDescription || !paymentNetwork) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Missing required card details"];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        return;
     }
+
+    // Check if the device supports adding payment passes
+    if (![PKAddPaymentPassViewController canAddPaymentPass]) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Device does not support adding payment passes"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        return;
+    }
+
+    PKAddPaymentPassRequestConfiguration *config = [[PKAddPaymentPassRequestConfiguration alloc] initWithEncryptionScheme:PKEncryptionSchemeECC_V2];
+    config.cardholderName = cardholderName;
+    config.primaryAccountSuffix = primaryAccountSuffix;
+    config.localizedDescription = localizedDescription;
+    config.paymentNetwork = paymentNetwork;
+    config.primaryAccountIdentifier = [self getCardFPAN:primaryAccountSuffix];
+
+    PKAddPaymentPassViewController *vc = [[PKAddPaymentPassViewController alloc] initWithRequestConfiguration:config delegate:self];
+
+    if (!vc) {
+        NSLog(@"Failed to initialize PKAddPaymentPassViewController. Configuration: %@", config);
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to initialize PKAddPaymentPassViewController"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        return;
+    }
+
+    self.pendingCommand = command;
+    [self.viewController presentViewController:vc animated:YES completion:nil];
 }
+
 
 - (void)authenticateWithFaceID:(CDVInvokedUrlCommand*)command {
     LAContext *context = [[LAContext alloc] init];
