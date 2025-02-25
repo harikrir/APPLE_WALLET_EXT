@@ -1,5 +1,10 @@
 #import <Cordova/CDV.h>
 #import <PassKit/PassKit.h>
+#import "Foundation/Foundation.h"
+#import "Cordova/CDV.h"
+#import <Cordova/CDVPlugin.h>
+#import <PassKit/PassKit.h>
+#import <WatchConnectivity/WatchConnectivity.h>
 
 @interface WalletExtensionCardsPlugin : CDVPlugin <PKAddPaymentPassViewControllerDelegate>
 
