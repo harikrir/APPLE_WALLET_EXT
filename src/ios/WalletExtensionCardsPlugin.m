@@ -5,6 +5,7 @@
 
 @interface WalletExtensionCardsPlugin () <PKAddPaymentPassViewControllerDelegate>
 @property (nonatomic, strong) CDVInvokedUrlCommand *pendingCommand;
+ @property (nonatomic, retain) UIViewController* addPaymentPassModal;
 @end
 
 @implementation WalletExtensionCardsPlugin
@@ -74,9 +75,11 @@
     config.paymentNetwork = paymentNetwork;
     config.primaryAccountIdentifier = [self getCardFPAN:primaryAccountSuffix];
 
-    PKAddPaymentPassViewController *vc = [[PKAddPaymentPassViewController alloc] initWithRequestConfiguration:config delegate:self];
 
-    if (!vc) {
+
+      self.addPaymentPassModal  = [[PKAddPaymentPassViewController alloc] initWithRequestConfiguration:config delegate:self];
+
+    if (!self.addPaymentPassModal) {
         NSLog(@"Failed to initialize PKAddPaymentPassViewController. Configuration: %@", config);
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to initialize PKAddPaymentPassViewController"];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -84,7 +87,7 @@
     }
 
     self.pendingCommand = command;
-    [self.viewController presentViewController:vc animated:YES completion:nil];
+    [self.viewController presentViewController:self.addPaymentPassModal animated:YES completion:nil];
 }
 
 
