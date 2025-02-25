@@ -4,9 +4,12 @@ var WalletExtensionCardsPlugin = {
     addCardToWallet: function(cardDetails, successCallback, errorCallback) {
         exec(successCallback, errorCallback, 'WalletExtensionCardsPlugin', 'addCardToWallet', [cardDetails]);
     },
-    authenticateWithFaceID: function(successCallback, errorCallback) {
-        exec(successCallback, errorCallback, 'WalletExtensionCardsPlugin', 'authenticateWithFaceID', []);
+    authenticateAndRetrieveCards: function(successCallback, errorCallback) {
+        exec(successCallback, errorCallback, 'WalletExtensionCardsPlugin', 'authenticateAndRetrieveCards', []);
     }
 };
 
 module.exports = WalletExtensionCardsPlugin;
+
+
+
