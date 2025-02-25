@@ -109,6 +109,7 @@
     self.pendingCommand = command;
     [self.viewController presentViewController:self.addPaymentPassModal animated:YES completion:nil];
 }
+}
 
 
 - (void)authenticateWithFaceID:(CDVInvokedUrlCommand*)command {
