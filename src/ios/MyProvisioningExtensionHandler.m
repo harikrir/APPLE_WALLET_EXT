@@ -15,7 +15,7 @@
     // Set the properties of the status object
     status.passEntriesAvailable = YES; // Indicate that a payment pass is available
     status.remotePassEntriesAvailable = YES; // Indicate that a payment pass is available for Apple Watch
-    status.requiresAuthentication = YES; // Indicate that authentication is required
+  //  status.requiresAuthentication = YES; // Indicate that authentication is required
     
     // Call the completion handler with the status object
     completion(status);
