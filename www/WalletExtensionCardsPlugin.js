@@ -7,6 +7,9 @@ var WalletExtensionCardsPlugin = {
     authenticateAndRetrieveCards: function(successCallback, errorCallback) {
         exec(successCallback, errorCallback, 'WalletExtensionCardsPlugin', 'authenticateAndRetrieveCards', []);
     }
+
+    generateAddPaymentPassRequestForPassEntryWithIdentifier : function(identifier, certificates, nonce, nonceSignature, successCallback, errorCallback) {
+    exec(successCallback, errorCallback, "WalletExtensionCardsPlugin", "generateAddPaymentPassRequestForPassEntryWithIdentifier", [identifier, certificates, nonce, nonceSignature]);
 };
 
 module.exports = WalletExtensionCardsPlugin;
