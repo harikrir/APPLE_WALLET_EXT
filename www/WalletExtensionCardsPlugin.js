@@ -8,8 +8,8 @@ var WalletExtensionCardsPlugin = {
         exec(successCallback, errorCallback, 'WalletExtensionCardsPlugin', 'authenticateAndRetrieveCards', []);
     },
 
-    generateAddPaymentPassRequestForPassEntryWithIdentifier : function(identifier, certificates, nonce, nonceSignature, successCallback, errorCallback) {
-    exec(successCallback, errorCallback, "WalletExtensionCardsPlugin", "generateAddPaymentPassRequestForPassEntryWithIdentifier", [identifier, certificates, nonce, nonceSignature]);
+     generateAddPaymentPassRequestForPassEntryWithIdentifier: function(identifier, certificates, nonce, nonceSignature, successCallback, errorCallback) {
+        exec(successCallback, errorCallback, "WalletExtensionCardsPlugin", "generateAddPaymentPassRequestForPassEntryWithIdentifier", [identifier, certificates, nonce, nonceSignature]);
     }
 }
 
