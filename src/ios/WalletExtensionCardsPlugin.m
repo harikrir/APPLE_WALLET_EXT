@@ -105,4 +105,35 @@
 @end
 
 
+// Implement PKIssuerProvisioningExtensionHandler
+@interface MyProvisioningExtensionHandler : PKIssuerProvisioningExtensionHandler
+@end
+
+@implementation MyProvisioningExtensionHandler
+
+- (void)statusWithCompletion:(void (^)(PKIssuerProvisioningExtensionStatus *status))completion {
+    PKIssuerProvisioningExtensionStatus *status = [[PKIssuerProvisioningExtensionStatus alloc] init];
+    status.passEntriesAvailable = YES; // Indicate that a payment pass is available
+    status.remotePassEntriesAvailable = YES; // Indicate that a payment pass is available for Apple Watch
+    status.requiresAuthentication = YES; // Indicate that authentication is required
+    completion(status);
+}
+
+@end
+
+// Implement PKIssuerProvisioningExtensionAuthorizationProviding
+@interface MyAuthorizationViewController : UIViewController <PKIssuerProvisioningExtensionAuthorizationProviding>
+@end
+
+@implementation MyAuthorizationViewController
+
+- (void)authorizeWithCompletionHandler:(void (^)(PKIssuerProvisioningExtensionAuthorizationResult *result))completionHandler {
+    // Perform authentication (e.g., Face ID, Touch ID, or app-specific authentication)
+    PKIssuerProvisioningExtensionAuthorizationResult *result = [[PKIssuerProvisioningExtensionAuthorizationResult alloc] init];
+    result.authorized = YES;
+    completionHandler(result);
+}
+
+@end
+
 
