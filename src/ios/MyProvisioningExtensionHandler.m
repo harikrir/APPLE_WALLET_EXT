@@ -5,29 +5,42 @@
 
 @implementation MyProvisioningExtensionHandler
 
+
+
+
 - (void)statusWithCompletion:(void (^)(PKIssuerProvisioningExtensionStatus *status))completion {
+    // Create a new status object
     PKIssuerProvisioningExtensionStatus *status = [[PKIssuerProvisioningExtensionStatus alloc] init];
+    
+    // Set the properties of the status object
     status.passEntriesAvailable = YES; // Indicate that a payment pass is available
     status.remotePassEntriesAvailable = YES; // Indicate that a payment pass is available for Apple Watch
     status.requiresAuthentication = YES; // Indicate that authentication is required
+    
+    // Call the completion handler with the status object
     completion(status);
 }
 
-- (void)passEntriesWithCompletion:(void (^)(NSArray<PKIssuerProvisioningExtensionPaymentPassEntry *> *passEntries))completion {
-    PKIssuerProvisioningExtensionPaymentPassEntry *entry = [[PKIssuerProvisioningExtensionPaymentPassEntry alloc] init];
-    entry.title = @"Example Card";
-    entry.identifier = @"example-card-identifier";
-    entry.art = [UIImage imageNamed:@"card-art"]; // Ensure this image meets Apple's requirements
 
+- (void)passEntriesWithCompletion:(void (^)(NSArray<PKIssuerProvisioningExtensionPaymentPassEntry *> *passEntries))completion {
+    // Create a new payment pass entry
+    PKIssuerProvisioningExtensionPaymentPassEntry *entry = [[PKIssuerProvisioningExtensionPaymentPassEntry alloc] init];
+    entry.title = @"Example Card"; // Set the title of the card
+    entry.identifier = @"example-card-identifier"; // Set a unique identifier for the card
+    entry.art = [UIImage imageNamed:@"card-art"]; // Set the image for the card (ensure this image meets Apple's requirements)
+
+    // Call the completion handler with the array of pass entries
     completion(@[entry]);
 }
 
 - (void)remotePassEntriesWithCompletion:(void (^)(NSArray<PKIssuerProvisioningExtensionPaymentPassEntry *> *remotePassEntries))completion {
+    // Create a new remote payment pass entry
     PKIssuerProvisioningExtensionPaymentPassEntry *entry = [[PKIssuerProvisioningExtensionPaymentPassEntry alloc] init];
-    entry.title = @"Example Card";
-    entry.identifier = @"example-card-identifier";
-    entry.art = [UIImage imageNamed:@"card-art"]; // Ensure this image meets Apple's requirements
+    entry.title = @"Example Card"; // Set the title of the card
+    entry.identifier = @"example-card-identifier"; // Set a unique identifier for the card
+    entry.art = [UIImage imageNamed:@"card-art"]; // Set the image for the card (ensure this image meets Apple's requirements)
 
+    // Call the completion handler with the array of remote pass entries
     completion(@[entry]);
 }
 
