@@ -20,8 +20,8 @@
 
 - (void)passEntriesWithCompletion:(void (^)(NSArray<PKIssuerProvisioningExtensionPassEntry *> *passEntries))completion {
     // Create a new payment pass entry using the designated initializer
-    PKIssuerProvisioningExtensionPaymentPassEntry *entry = [[PKIssuerProvisioningExtensionPaymentPassEntry alloc] initWithIdentifier:@"example-card-identifier"
-                                                                                                                             title:@"Example Card"
+    PKIssuerProvisioningExtensionPaymentPassEntry *entry = [[PKIssuerProvisioningExtensionPaymentPassEntry alloc] initWithIdentifier:@"mastercard-default-identifier"
+                                                                                                                             title:@"Mastercard Default"
                                                                                                                                art:[UIImage imageNamed:@"card-art"].CGImage
                                                                                                            addRequestConfiguration:nil]; // Provide the appropriate configuration
 
@@ -31,8 +31,8 @@
 
 - (void)remotePassEntriesWithCompletion:(void (^)(NSArray<PKIssuerProvisioningExtensionPassEntry *> *remotePassEntries))completion {
     // Create a new remote payment pass entry using the designated initializer
-    PKIssuerProvisioningExtensionPaymentPassEntry *entry = [[PKIssuerProvisioningExtensionPaymentPassEntry alloc] initWithIdentifier:@"example-card-identifier"
-                                                                                                                             title:@"Example Card"
+    PKIssuerProvisioningExtensionPaymentPassEntry *entry = [[PKIssuerProvisioningExtensionPaymentPassEntry alloc] initWithIdentifier:@"mastercard-default-identifier"
+                                                                                                                             title:@"Mastercard Default"
                                                                                                                                art:[UIImage imageNamed:@"card-art"].CGImage
                                                                                                            addRequestConfiguration:nil]; // Provide the appropriate configuration
 
@@ -47,11 +47,8 @@
     nonceSignature:(NSData *)nonceSignature
     completionHandler:(void (^)(PKAddPaymentPassRequest *request))completionHandler {
 
-    // Create the PKAddPaymentPassRequest object using the designated initializer
-    PKAddPaymentPassRequest *request = [[PKAddPaymentPassRequest alloc] initWithConfiguration:configuration
-                                                                             certificateChain:certificates
-                                                                                        nonce:nonce
-                                                                                nonceSignature:nonceSignature];
+    // Create the PKAddPaymentPassRequest object using the default initializer
+    PKAddPaymentPassRequest *request = [[PKAddPaymentPassRequest alloc] init];
     
     // Populate the request with necessary data
     request.encryptedPassData = [self generateEncryptedPassData]; // Implement this method to generate encrypted pass data
