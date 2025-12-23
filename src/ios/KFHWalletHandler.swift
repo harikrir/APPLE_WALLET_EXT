@@ -1,17 +1,19 @@
 import PassKit
 class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
-   let sharedSuite = UserDefaults(suiteName: "group.com.bhuat.wallet")
+   let sharedSuite = UserDefaults(suiteName: "group.com.aub.mobilebanking.uat.bh")
    override func status(completion: @escaping (PKIssuerProvisioningExtensionStatus) -> Void) {
        let status = PKIssuerProvisioningExtensionStatus()
-       status.requiresAuthentication = (sharedSuite?.string(forKey: "KFH_Auth_Token") == nil)
+       // If the token is missing from the App Group, the UI extension will trigger
+       status.requiresAuthentication = (sharedSuite?.string(forKey: "AUB_Auth_Token") == nil)
        status.passEntriesAvailable = true
        completion(status)
    }
    override func passEntries(completion: @escaping ([PKIssuerProvisioningExtensionPassEntry]) -> Void) {
-       guard let token = sharedSuite?.string(forKey: "KFH_Auth_Token") else {
+       guard let token = sharedSuite?.string(forKey: "AUB_Auth_Token") else {
            completion([]); return
        }
-       let url = URL(string: "https://api.kfh.com/v1/wallet/cards")!
+       // Fetch cards from your AUB Backend
+       let url = URL(string: "https://api.aub.com.bh/v1/wallet/cards")!
        var request = URLRequest(url: url)
        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
        URLSession.shared.dataTask(with: request) { data, _, _ in
