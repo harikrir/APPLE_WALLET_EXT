@@ -6,6 +6,11 @@
 </js-module>
 <platform name="ios">
 <dependency id="cordova-plugin-add-app-extension" url="https://github.com/dpa99c/cordova-plugin-add-app-extension.git" />
+<config-file target="config.xml" parent="/*">
+<feature name="KFHWalletPlugin">
+<param name="ios-package" value="KFHWalletPlugin" />
+</feature>
+</config-file>
 <config-file target="*/Entitlements-Release.plist" parent="com.apple.security.application-groups">
 <array><string>group.com.aub.mobilebanking.uat.bh</string></array>
 </config-file>
@@ -16,6 +21,6 @@
 <extension-target name="KFHUI" identifier="com.aub.mobilebanking.uat.bh.wallet.ui" type="issuer-provisioning-ui">
 <source-file src="src/ios/KFHUIHandler.swift" />
 </extension-target>
+<source-file src="src/ios/KFHWalletPlugin.swift" />
 </platform>
 </plugin>
- 
