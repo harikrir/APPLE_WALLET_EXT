@@ -5,7 +5,6 @@
 <clobbers target="KFHWallet" />
 </js-module>
 <platform name="ios">
-<dependency id="cordova-plugin-add-app-extension" url="https://github.com/dpa99c/cordova-plugin-add-app-extension.git" />
 <config-file target="config.xml" parent="/*">
 <feature name="KFHWalletPlugin">
 <param name="ios-package" value="KFHWalletPlugin" />
