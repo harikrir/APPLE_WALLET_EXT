@@ -1,46 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-wallet-extension-cards" version="1.0.0">
-    <name>WalletExtensionCardsPlugin</name>
-    <description>Cordova plugin for Wallet Extensions to add payment cards</description>
-    <license>MIT</license>
-    <keywords>wallet, extension, passkit, cards, ios</keywords>
-    <js-module src="www/WalletExtensionCardsPlugin.js" name="WalletExtensionCardsPlugin">
-        <clobbers target="WalletExtensionCardsPlugin" />
-    </js-module>
-    <platform name="ios">
-        <config-file target="config.xml" parent="/*">
-            <feature name="WalletExtensionCardsPlugin">
-                <param name="ios-package" value="WalletExtensionCardsPlugin" onload="true" />
-            </feature>
-        </config-file>
- <config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.payment-pass-provisioning">
-            <true/>
-        </config-file>
-        <config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning">
-            <true/>
-        </config-file>
-
-
-        
-
-  
-
-
-        
-        
-        <config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.pass-type-identifiers">
-            <array>
-                <string>com.aub.mobilebanking.bh</string>
-                 <string>com.aub.mobilebanking.uat.bh</string>             
-            </array>
-        </config-file>
-        
-        
-        <source-file src="src/ios/WalletExtensionCardsPlugin.h" />
-        <source-file src="src/ios/WalletExtensionCardsPlugin.m" />
-         <source-file src="src/ios/MyProvisioningExtensionHandler.m" />
-        <source-file src="src/ios/MyAuthorizationViewController.m" />
-        <framework src="PassKit.framework" />
-        <framework src="LocalAuthentication.framework" />
-    </platform>
+<plugin id="com.kfh.wallet.issuer" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0">
+<name>KFH Wallet Extension</name>
+<platform name="ios">
+<dependency id="cordova-plugin-add-app-extension" url="https://github.com/dpa99c/cordova-plugin-add-app-extension.git" />
+<config-file target="*/Entitlements-Release.plist" parent="com.apple.security.application-groups">
+<array><string>group.com.bhuat.wallet</string></array>
+</config-file>
+<extension-target name="KFHWalletHandler" identifier="com.kfh.bh.wallet.ext" type="issuer-provisioning-non-ui">
+<source-file src="src/ios/KFHWalletHandler.swift" />
+</extension-target>
+</platform>
 </plugin>
