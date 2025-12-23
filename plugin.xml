@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin id="com.kfh.wallet.issuer" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0">
-<name>KFH Wallet Extension</name>
+<plugin id="com.aub.wallet.issuer" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0">
+<name>KFH Wallet Extension Plugin</name>
+<js-module name="KFHWallet" src="www/KFHWallet.js">
+<clobbers target="KFHWallet" />
+</js-module>
 <platform name="ios">
 <dependency id="cordova-plugin-add-app-extension" url="https://github.com/dpa99c/cordova-plugin-add-app-extension.git" />
 <config-file target="*/Entitlements-Release.plist" parent="com.apple.security.application-groups">
-<array><string>group.com.bhuat.wallet</string></array>
+<array><string>group.com.aub.mobilebanking.uat.bh</string></array>
 </config-file>
-<extension-target name="KFHWalletHandler" identifier="com.kfh.bh.wallet.ext" type="issuer-provisioning-non-ui">
+<extension-target name="KFHNonUI" identifier="com.aub.mobilebanking.uat.bh.wallet.ext" type="issuer-provisioning-non-ui">
 <source-file src="src/ios/KFHWalletHandler.swift" />
+<resource-file src="src/ios/kfh_card_art.png" />
+</extension-target>
+<extension-target name="KFHUI" identifier="com.aub.mobilebanking.uat.bh.wallet.ui" type="issuer-provisioning-ui">
+<source-file src="src/ios/KFHUIHandler.swift" />
 </extension-target>
 </platform>
 </plugin>
+ 
