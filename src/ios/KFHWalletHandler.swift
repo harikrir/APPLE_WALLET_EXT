@@ -1,43 +1,43 @@
 import Foundation
 import PassKit
-import UIkit
-
+import UIKit
 class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
-   // Exact same Group Name used in OutSystems JS
    let sharedSuite = UserDefaults(suiteName: "group.com.aub.mobilebanking.uat.bh")
    override func status(completion: @escaping (PKIssuerProvisioningExtensionStatus) -> Void) {
-   // This will print the ID of the extension currently running to the Mac Console
-   print("Extension waking up with ID: \(Bundle.main.bundleIdentifier ?? "Unknown")")
-   let status = PKIssuerProvisioningExtensionStatus()
-   status.requiresAuthentication = (sharedSuite?.string(forKey: "AUB_Auth_Token") == nil)
-   status.passEntriesAvailable = true
-   completion(status)
-}
+       let status = PKIssuerProvisioningExtensionStatus()
+       let token = sharedSuite?.string(forKey: "AUB_Auth_Token")
+       status.requiresAuthentication = (token == nil)
+       status.passEntriesAvailable = true
+       completion(status)
+   }
    override func passEntries(completion: @escaping ([PKIssuerProvisioningExtensionPassEntry]) -> Void) {
        guard let token = sharedSuite?.string(forKey: "AUB_Auth_Token") else {
            completion([]); return
        }
-       // Fetch cards from KFH Backend
        let url = URL(string: "https://api.aub.com.bh/v1/wallet/cards")!
        var request = URLRequest(url: url)
+       request.httpMethod = "GET"
        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
        URLSession.shared.dataTask(with: request) { data, _, _ in
            guard let data = data,
                  let cards = try? JSONDecoder().decode([KFHCard].self, from: data) else {
                completion([]); return
            }
-           let entries = cards.map { card in
+           let entries = cards.compactMap { card -> PKIssuerProvisioningExtensionPassEntry? in
+               // Ensure the image exists in your plugin resources
+               guard let image = UIImage(named: "kfh_card_art"), let cgImage = image.cgImage else {
+                   return nil
+               }
                return PKIssuerProvisioningExtensionPassEntry(
                    identifier: card.id,
                    title: card.name,
-                   art: UIImage(named: "kfh_card_art")!.cgImage!,
+                   art: cgImage,
                    addRequestConfiguration: PKAddPaymentPassRequestConfiguration(encryptionScheme: .ECC_V2)!
                )
            }
            completion(entries)
        }.resume()
    }
-   // Handles the actual encryption handshake
    override func generateAddPaymentPassRequest(forPassEntryWithIdentifier identifier: String, configuration: PKAddPaymentPassRequestConfiguration, certificateChain: [Data], nonce: Data, nonceSignature: Data, completionHandler: @escaping (PKAddPaymentPassRequest?) -> Void) {
        guard let token = sharedSuite?.string(forKey: "AUB_Auth_Token") else {
            completionHandler(nil); return
