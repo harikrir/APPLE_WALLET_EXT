@@ -1,4 +1,7 @@
+import Foundation
 import PassKit
+import UIkit
+
 class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
    // Exact same Group Name used in OutSystems JS
    let sharedSuite = UserDefaults(suiteName: "group.com.aub.mobilebanking.uat.bh")
