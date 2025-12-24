@@ -3,13 +3,13 @@ class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
    // Exact same Group Name used in OutSystems JS
    let sharedSuite = UserDefaults(suiteName: "group.com.aub.mobilebanking.uat.bh")
    override func status(completion: @escaping (PKIssuerProvisioningExtensionStatus) -> Void) {
-       let status = PKIssuerProvisioningExtensionStatus()
-       // If token is missing, the system will trigger KFHUIHandler (UI Extension)
-       let token = sharedSuite?.string(forKey: "AUB_Auth_Token")
-       status.requiresAuthentication = (token == nil)
-       status.passEntriesAvailable = true
-       completion(status)
-   }
+   // This will print the ID of the extension currently running to the Mac Console
+   print("Extension waking up with ID: \(Bundle.main.bundleIdentifier ?? "Unknown")")
+   let status = PKIssuerProvisioningExtensionStatus()
+   status.requiresAuthentication = (sharedSuite?.string(forKey: "AUB_Auth_Token") == nil)
+   status.passEntriesAvailable = true
+   completion(status)
+}
    override func passEntries(completion: @escaping ([PKIssuerProvisioningExtensionPassEntry]) -> Void) {
        guard let token = sharedSuite?.string(forKey: "AUB_Auth_Token") else {
            completion([]); return
