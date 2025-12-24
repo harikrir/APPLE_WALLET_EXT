@@ -4,22 +4,20 @@ class KFHUIHandler: UIViewController, PKIssuerProvisioningExtensionAuthorization
    var completionHandler: ((PKIssuerProvisioningExtensionAuthorizationResult) -> Void)?
    override func viewDidLoad() {
        super.viewDidLoad()
-       setupUI()
-   }
-   private func setupUI() {
        view.backgroundColor = .white
-       let label = UILabel(frame: CGRect(x: 20, y: 100, width: 300, height: 40))
-       label.text = "Authorize KFH Wallet Access"
+       let label = UILabel(frame: CGRect(x: 20, y: 100, width: 280, height: 60))
+       label.text = "Please log in to the AUB Mobile app to manage your cards."
+       label.numberOfLines = 0
+       label.textAlignment = .center
        view.addSubview(label)
-       let btn = UIButton(frame: CGRect(x: 20, y: 160, width: 150, height: 44))
-       btn.setTitle("Log In", for: .normal)
-       btn.backgroundColor = .systemBlue
-       btn.layer.cornerRadius = 8
-       btn.addTarget(self, action: #selector(onAuth), for: .touchUpInside)
-       view.addSubview(btn)
+       let loginBtn = UIButton(type: .system)
+       loginBtn.frame = CGRect(x: 50, y: 200, width: 200, height: 50)
+       loginBtn.setTitle("Open AUB App", for: .normal)
+       loginBtn.addTarget(self, action: #selector(authorize), for: .touchUpInside)
+       view.addSubview(loginBtn)
    }
-   @objc func onAuth() {
-       // Logic to authorize and save token to App Group would occur here
+   @objc func authorize() {
+       // In a real app, you'd check if auth succeeded
        completionHandler?(.authorized)
    }
 }
