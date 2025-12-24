@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin id="com.aub.wallet.issuer" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="com.aub.wallet.issuer" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0">
 <name>KFH Wallet Extension Plugin</name>
 <js-module name="KFHWallet" src="www/KFHWallet.js">
 <clobbers target="KFHWallet" />
@@ -11,6 +11,11 @@
 </feature>
 </config-file>
 <config-file target="*/Entitlements-Release.plist" parent="com.apple.security.application-groups">
+<array>
+<string>group.com.aub.mobilebanking.uat.bh</string>
+</array>
+</config-file>
+<config-file target="*/Entitlements-Debug.plist" parent="com.apple.security.application-groups">
 <array>
 <string>group.com.aub.mobilebanking.uat.bh</string>
 </array>
@@ -33,5 +38,8 @@
 </array>
 </config-file>
 </extension-target>
+<preference name="SwiftVersion" value="5.0" />
+<preference name="deployment-target" value="13.0" />
 </platform>
 </plugin>
+ 
