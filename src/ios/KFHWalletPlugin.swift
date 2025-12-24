@@ -42,8 +42,17 @@ extension KFHWalletPlugin: PKAddPaymentPassViewControllerDelegate {
        // request.ephemeralPublicKey = ...
        completionHandler(request)
    }
-   func addPaymentPassViewController(_ controller: PKAddPaymentPassViewController, didFinishWith pass: PKPaymentPass?, error: Error?) {
-       // This closes the Apple sheet regardless of success or failure
-       controller.dismiss(animated: true, completion: nil)
+   
+
+func addPaymentPassViewController(_ controller: PKAddPaymentPassViewController, generateRequestWithCertificateChain certificates: [Data], nonce: Data, nonceSignature: Data, completionHandler: @escaping (PKAddPaymentPassRequest) -> Void) {
+       // We MUST return an object to prevent the build error and UI hang
+       let request = PKAddPaymentPassRequest()
+       // In a real scenario, you populate these from your KFH API
+       // For now, we provide empty Data objects to satisfy the compiler
+       request.encryptedPassData = Data()
+       request.activationData = Data()
+       request.ephemeralPublicKey = Data()
+       completionHandler(request)
    }
+   
 }
