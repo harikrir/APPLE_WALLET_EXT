@@ -11,15 +11,13 @@
 </feature>
 </config-file>
 <config-file target="*/Entitlements-Release.plist" parent="com.apple.security.application-groups">
-<array><string>group.com.aub.mobilebanking.uat.bh</string></array>
+<array>
+<string>group.com.aub.mobilebanking.uat.bh</string>
+</array>
 </config-file>
-<extension-target name="KFHNonUI" identifier="com.aub.mobilebanking.uat.bh.wallet.ext" type="issuer-provisioning-non-ui">
-<source-file src="src/ios/KFHWalletHandler.swift" />
-<resource-file src="src/ios/kfh_card_art.png" />
-</extension-target>
-<extension-target name="KFHUI" identifier="com.aub.mobilebanking.uat.bh.wallet.ui" type="issuer-provisioning-ui">
-<source-file src="src/ios/KFHUIHandler.swift" />
-</extension-target>
 <source-file src="src/ios/KFHWalletPlugin.swift" />
+<source-file src="src/ios/KFHWalletHandler.swift" />
+<source-file src="src/ios/KFHUIHandler.swift" />
+<resource-file src="src/ios/kfh_card_art.png" />
 </platform>
 </plugin>
