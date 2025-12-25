@@ -20,7 +20,7 @@
 <string>group.com.aub.mobilebanking.uat.bh</string>
 </array>
 </config-file>
-<source-file src="src/ios/KFHWalletPlugin.swift" />
+// <source-file src="src/ios/KFHWalletPlugin.swift" />
 <extension-target name="KFHNonUI" identifier="com.aub.mobilebanking.uat.bh.wallet.ext" type="issuer-provisioning-non-ui">
 <source-file src="src/ios/KFHWalletHandler.swift" />
 <resource-file src="src/ios/kfh_card_art.png" />
@@ -43,3 +43,4 @@
 </platform>
 </plugin>
  
+
