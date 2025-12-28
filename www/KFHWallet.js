@@ -1,12 +1,26 @@
 var exec = require('cordova/exec');
 var KFHWallet = {
-   // Check if device supports adding payment passes
+   /**
+    * Check if the device and the OS support adding payment passes.
+    * This should be called before showing the "Add to Wallet" button.
+    * * @param {Function} success - Callback receiving a boolean (true/false)
+    * @param {Function} error - Callback receiving error details
+    */
    canAddCard: function(success, error) {
        exec(success, error, "KFHWalletPlugin", "canAddCard", []);
    },
-   // Trigger the flow to push a card to Apple Wallet
+   /**
+    * Trigger the In-App Provisioning flow.
+    * This opens the native Apple Pay "Add Card" sheet.
+    * * @param {string} cardId - The unique ID or suffix of the card
+    * @param {string} cardName - The display name (e.g., "KFH Visa Signature")
+    * @param {Function} success - Called if card is added successfully
+    * @param {Function} error - Called if user cancels or process fails
+    */
    startProvisioning: function(cardId, cardName, success, error) {
-       exec(success, error, "KFHWalletPlugin", "startProvisioning", [cardId, cardName]);
+       // Ensure arguments are strings as expected by the Swift side
+       var args = [String(cardId), String(cardName)];
+       exec(success, error, "KFHWalletPlugin", "startProvisioning", args);
    }
 };
 module.exports = KFHWallet;
