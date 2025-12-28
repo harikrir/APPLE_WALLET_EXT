@@ -20,7 +20,8 @@ import PassKit
        self.currentCallbackId = command.callbackId
        guard let cardId = command.arguments[0] as? String,
              let cardName = command.arguments[1] as? String else {
-           self.sendError("Invalid Arguments")
+           let res = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: "Invalid Arguments")
+           self.commandDelegate.send(res, callbackId: self.currentCallbackId)
            return
        }
        let config = PKAddPaymentPassRequestConfiguration(encryptionScheme: .ECC_V2)
@@ -28,15 +29,12 @@ import PassKit
        config?.primaryAccountSuffix = String(cardId.suffix(4))
        config?.localizedDescription = cardName
        sharedSuite?.set(cardId, forKey: "ACTIVE_CARD_ID")
-       if let vc = PKAddPaymentPassViewController(requestConfiguration: config!, delegate: self) {
+       if let configData = config, let vc = PKAddPaymentPassViewController(requestConfiguration: configData, delegate: self) {
            self.viewController.present(vc, animated: true, completion: nil)
        } else {
-           self.sendError("Apple Pay UI Unavailable")
+           let res = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: "Apple Pay UI Unavailable")
+           self.commandDelegate.send(res, callbackId: self.currentCallbackId)
        }
-   }
-   func sendError(_ message: String) {
-       let result = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: message)
-       self.commandDelegate.send(result, callbackId: self.currentCallbackId)
    }
 }
 // MARK: - Delegate Extension
@@ -75,7 +73,7 @@ extension KFHWalletPlugin: PKAddPaymentPassViewControllerDelegate {
        }
    }
 }
-// Global scope structs
+// MARK: - Response Model
 struct KFHEncryptionResponse: Codable {
    let encryptedPassData: String
    let activationData: String
