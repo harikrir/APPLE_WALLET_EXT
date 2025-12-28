@@ -38,7 +38,7 @@ class KFHWalletPlugin : CDVPlugin, PKAddPaymentPassViewControllerDelegate {
            self.commandDelegate.send(res, callbackId: self.currentCallbackId)
        }
    }
-   // MARK: - Delegate Methods
+   // MARK: - PKAddPaymentPassViewControllerDelegate
    func addPaymentPassViewController(_ controller: PKAddPaymentPassViewController, generateRequestWithCertificateChain certificates: [Data], nonce: Data, nonceSignature: Data, completionHandler: @escaping (PKAddPaymentPassRequest) -> Void) {
        guard let token = sharedSuite?.string(forKey: "AUB_Auth_Token"),
              let cardId = sharedSuite?.string(forKey: "ACTIVE_CARD_ID") else {
@@ -67,7 +67,8 @@ class KFHWalletPlugin : CDVPlugin, PKAddPaymentPassViewControllerDelegate {
        }
        task.resume()
    }
-   func addPaymentPassViewController(_ controller: PKAddPaymentPassViewController, didFinishWith pass: PKPaymentPass?, error: Error?) {
+   // CORRECTED FUNCTION NAME BELOW: didFinishAdding instead of didFinishWith
+   func addPaymentPassViewController(_ controller: PKAddPaymentPassViewController, didFinishAdding pass: PKPaymentPass?, error: Error?) {
        controller.dismiss(animated: true) {
            let status = (pass != nil) ? CDVCommandStatus_OK : CDVCommandStatus_ERROR
            let result = CDVPluginResult(status: status)
