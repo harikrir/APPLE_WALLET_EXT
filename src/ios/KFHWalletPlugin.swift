@@ -1,12 +1,14 @@
 import Foundation
 import PassKit
-@objc(KFHWalletPlugin) class KFHWalletPlugin : CDVPlugin {
+@objc(KFHWalletPlugin)
+class KFHWalletPlugin : CDVPlugin, PKAddPaymentPassViewControllerDelegate {
    var currentCallbackId: String?
    let sharedSuite = UserDefaults(suiteName: "group.com.aub.mobilebanking.uat.bh")
    @objc(canAddCard:)
    func canAddCard(command: CDVInvokedUrlCommand) {
        let isAvailable = PKAddPaymentPassViewController.canAddPaymentPass()
-       self.commandDelegate.send(CDVPluginResult(status: CDVCommandStatus_OK, messageAs: isAvailable), callbackId: command.callbackId)
+       let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: isAvailable)
+       self.commandDelegate.send(result, callbackId: command.callbackId)
    }
    @objc(setAuthToken:)
    func setAuthToken(command: CDVInvokedUrlCommand) {
@@ -20,7 +22,7 @@ import PassKit
        self.currentCallbackId = command.callbackId
        guard let cardId = command.arguments[0] as? String,
              let cardName = command.arguments[1] as? String else {
-           let res = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: "Invalid Arguments")
+           let res = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: "Invalid Args")
            self.commandDelegate.send(res, callbackId: self.currentCallbackId)
            return
        }
@@ -32,13 +34,11 @@ import PassKit
        if let configData = config, let vc = PKAddPaymentPassViewController(requestConfiguration: configData, delegate: self) {
            self.viewController.present(vc, animated: true, completion: nil)
        } else {
-           let res = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: "Apple Pay UI Unavailable")
+           let res = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: "Apple Pay Unavailable")
            self.commandDelegate.send(res, callbackId: self.currentCallbackId)
        }
    }
-}
-// MARK: - Delegate Extension
-extension KFHWalletPlugin: PKAddPaymentPassViewControllerDelegate {
+   // MARK: - Delegate Methods
    func addPaymentPassViewController(_ controller: PKAddPaymentPassViewController, generateRequestWithCertificateChain certificates: [Data], nonce: Data, nonceSignature: Data, completionHandler: @escaping (PKAddPaymentPassRequest) -> Void) {
        guard let token = sharedSuite?.string(forKey: "AUB_Auth_Token"),
              let cardId = sharedSuite?.string(forKey: "ACTIVE_CARD_ID") else {
@@ -56,7 +56,7 @@ extension KFHWalletPlugin: PKAddPaymentPassViewControllerDelegate {
        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-       URLSession.shared.dataTask(with: request) { data, _, _ in
+       let task = URLSession.shared.dataTask(with: request) { data, response, error in
            let addRequest = PKAddPaymentPassRequest()
            if let data = data, let res = try? JSONDecoder().decode(KFHEncryptionResponse.self, from: data) {
                addRequest.encryptedPassData = Data(base64Encoded: res.encryptedPassData)
@@ -64,16 +64,17 @@ extension KFHWalletPlugin: PKAddPaymentPassViewControllerDelegate {
                addRequest.ephemeralPublicKey = Data(base64Encoded: res.ephemeralPublicKey)
            }
            completionHandler(addRequest)
-       }.resume()
+       }
+       task.resume()
    }
    func addPaymentPassViewController(_ controller: PKAddPaymentPassViewController, didFinishWith pass: PKPaymentPass?, error: Error?) {
        controller.dismiss(animated: true) {
-           let result = (pass != nil) ? CDVPluginResult(status: CDVCommandStatus_OK) : CDVPluginResult(status: CDVCommandStatus_ERROR)
+           let status = (pass != nil) ? CDVCommandStatus_OK : CDVCommandStatus_ERROR
+           let result = CDVPluginResult(status: status)
            self.commandDelegate.send(result, callbackId: self.currentCallbackId)
        }
    }
 }
-// MARK: - Response Model
 struct KFHEncryptionResponse: Codable {
    let encryptedPassData: String
    let activationData: String
