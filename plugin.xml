@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-aub-wallet" version="1.0.0">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="com.aub.mobilebanking.wallet" version="1.0.0">
     <name>AUB Wallet Plugin</name>
     <js-module src="www/AUBWallet.js" name="AUBWallet">
         <clobbers target="AUBWallet" />
@@ -7,35 +7,26 @@
 
     <platform name="ios">
         <hook type="after_prepare" src="hooks/configure_extensions.js" />
-
+        
         <config-file target="config.xml" parent="/*">
-            <feature name="AUBWalletPlugin">
-                <param name="ios-package" value="AUBWalletPlugin" />
-                <param name="onload" value="true" />
-            </feature>
+            <feature name="AUBWalletPlugin"><param name="ios-package" value="AUBWalletPlugin" /></feature>
         </config-file>
-
-        <config-file target="*/Entitlements-Debug.plist" parent="com.apple.security.application-groups">
-            <array><string>group.com.aub.mobilebanking.uat.bh</string></array>
-        </config-file>
-        <config-file target="*/Entitlements-Release.plist" parent="com.apple.security.application-groups">
-            <array><string>group.com.aub.mobilebanking.uat.bh</string></array>
-        </config-file>
-        <config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.payment-pass-provisioning"><true/></config-file>
-        <config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning"><true/></config-file>
 
         <source-file src="src/ios/AUBWalletPlugin.swift" />
-        <source-file src="src/ios/AppGroupManager.swift" />
-        <source-file src="src/ios/SharedModels.swift" />
-        
-        <source-file src="src/ios/WNonUIExt/WNonUIExtHandler.swift" target-dir="WNonUIExt" />
-        <header-file src="src/ios/WNonUIExt/Info.plist" target-dir="WNonUIExt" />
-        <resource-file src="src/ios/WNonUIExt/WNonUIExt.entitlements" target-dir="WNonUIExt" />
+        <source-file src="src/ios/WNonUIExt/WNonUIExtHandler.swift" />
+        <source-file src="src/ios/WNonUIExt/Models/AppGroupManager.swift" />
+        <source-file src="src/ios/WNonUIExt/Models/SharedModels.swift" />
+        <source-file src="src/ios/WUIExt/WUIExtHandler.swift" />
+        <source-file src="src/ios/WUIExt/WUIExtView.swift" />
 
-        <source-file src="src/ios/WUIExt/WUIExtHandler.swift" target-dir="WUIExt" />
-        <source-file src="src/ios/WUIExt/WUIExtView.swift" target-dir="WUIExt" />
-        <header-file src="src/ios/WUIExt/Info.plist" target-dir="WUIExt" />
+        <resource-file src="src/ios/WNonUIExt/Info.plist" target-dir="WNonUIExt" />
+        <resource-file src="src/ios/WNonUIExt/WNonUIExt.entitlements" target-dir="WNonUIExt" />
+        <resource-file src="src/ios/WUIExt/Info.plist" target-dir="WUIExt" />
         <resource-file src="src/ios/WUIExt/WUIExt.entitlements" target-dir="WUIExt" />
+        <resource-file src="src/ios/kfh_card_art.png" />
+
+        <resource-file src="src/ios/profiles/com.aub.mobilebanking.uat.bh.WNonUI.mobileprovision" />
+        <resource-file src="src/ios/profiles/com.aub.mobilebanking.uat.bh.WUI.mobileprovision" />
 
         <framework src="PassKit.framework" />
         <framework src="SwiftUI.framework" />
