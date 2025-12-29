@@ -1,38 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="kfh-wallet-plugin" version="1.0.0">
-<name>KFH Wallet</name>
-<js-module src="www/kfhwallet.js" name="KFHWalletPlugin">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+
+        id="com-kfh-wallet-plugin"
+
+        version="1.0.0">
+<name>KFH Wallet Plugin</name>
+<description>Apple Pay In-App Provisioning for KFH</description>
+<js-module src="www/KFHWalletPlugin.js" name="KFHWalletPlugin">
 <clobbers target="KFHWalletPlugin" />
 </js-module>
 <platform name="ios">
 <config-file target="config.xml" parent="/*">
 <feature name="KFHWalletPlugin">
-<param name="ios-package" value="KFHWalletPlugin" onload="true"/>
+<param name="ios-package" value="KFHWalletPlugin" />
 </feature>
 </config-file>
-<preference name="SwiftVersion" default="5.0" />
-<variable name="SWIFTVERSION" value="5.0" />
-<config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.payment-pass-provisioning">
+<config-file target="*/Entitlements-Release.plist" parent="/">
+<dict>
+<key>com.apple.security.application-groups</key>
+<array>
+<string>group.com.aub.mobilebanking.uat.bh</string>
+</array>
+<key>com.apple.developer.payment-pass-provisioning</key>
 <true/>
+</dict>
 </config-file>
-<config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning">
-<true/>
-</config-file>
-<config-file target="*/Entitlements-Debug.plist" parent="com.apple.security.application-groups">
-<array><string>group.com.aub.mobilebanking.uat.bh</string></array>
-</config-file>
-<config-file target="*/Entitlements-Release.plist" parent="com.apple.security.application-groups">
-<array><string>group.com.aub.mobilebanking.uat.bh</string></array>
-</config-file>
+<source-file src="src/ios/KFHWalletPlugin.swift" />
+<source-file src="src/ios/KFHModels.swift" />
 <extension-target name="WNonUI" bundle-id="com.aub.mobilebanking.uat.bh.WNonUI">
 <config-file target="*-Info.plist" parent="NSExtension">
 <dict>
 <key>NSExtensionPointIdentifier</key>
 <string>com.apple.PassKit.issuer-provisioning</string>
 <key>NSExtensionPrincipalClass</key>
-<string>WNonUI.KFHWalletHandler</string>
+<string>$(PRODUCT_NAME).KFHWalletHandler</string>
 </dict>
 </config-file>
+<config-file target="*/Entitlements-Release.plist" parent="/">
+<dict>
+<key>com.apple.security.application-groups</key>
+<array>
+<string>group.com.aub.mobilebanking.uat.bh</string>
+</array>
+<key>com.apple.developer.payment-pass-provisioning</key>
+<true/>
+</dict>
+</config-file>
+<source-file src="src/ios/KFHWalletHandler.swift" />
 </extension-target>
 <extension-target name="WUI" bundle-id="com.aub.mobilebanking.uat.bh.WUI">
 <config-file target="*-Info.plist" parent="NSExtension">
@@ -40,19 +54,22 @@
 <key>NSExtensionPointIdentifier</key>
 <string>com.apple.PassKit.issuer-provisioning.authorization</string>
 <key>NSExtensionPrincipalClass</key>
-<string>WUI.KFHUIHandler</string>
+<string>$(PRODUCT_NAME).KFHUIHandler</string>
 </dict>
 </config-file>
-</extension-target>
-<source-file src="src/ios/KFHWalletPlugin.swift" />
-<source-file src="src/ios/KFHWalletHandler.swift" />
+<config-file target="*/Entitlements-Release.plist" parent="/">
+<dict>
+<key>com.apple.security.application-groups</key>
+<array>
+<string>group.com.aub.mobilebanking.uat.bh</string>
+</array>
+<key>com.apple.developer.payment-pass-provisioning</key>
+<true/>
+</dict>
+</config-file>
 <source-file src="src/ios/KFHUIHandler.swift" />
-<source-file src="src/ios/KFHModels.swift" />
-<resource-file src="src/ios/kfh_card_art.png" />
+</extension-target>
 <framework src="PassKit.framework" />
-<framework src="Security.framework" />
-<hook type="after_prepare" src="hooks/install_profiles.js"/>
 </platform>
 </plugin>
  
-
