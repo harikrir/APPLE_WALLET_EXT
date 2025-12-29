@@ -1,19 +1,12 @@
-/*
-See the LICENSE.txt file for this sample’s licensing information.
-
-Abstract:
-The mock data and request related to payment passes.
-*/
-
 import os
 import PassKit
 
-let log = Logger()
+// Initialize the system logger for the AUB bundle
+let log = Logger(subsystem: "com.aub.mobilebanking.uat.bh", category: "WalletExtension")
 
 /**
- This structure mocks the data that the user's defaults database can store to support the code
- in the non-UI extension. Refactor this structure to support the issuer app's persisted
- payment card data.
+ This structure defines the card data stored in the App Group.
+ It must be Codable so it can be saved to/read from UserDefaults.
  */
 struct ProvisioningCredential: Equatable, Codable, Hashable {
     var primaryAccountIdentifier: String
@@ -27,8 +20,7 @@ struct ProvisioningCredential: Equatable, Codable, Hashable {
 }
 
 /**
- This structure mocks a response object for encrypted pass data to support the sample code
- in the non-UI extension.
+ This structure holds the encrypted payload required by Apple Pay.
  */
 struct EncryptedPassDataResponse {
     var activationData: Data?
@@ -38,19 +30,28 @@ struct EncryptedPassDataResponse {
 }
 
 /**
- This structure mocks retrieving required data for a payment pass to support the sample code in the
- non-UI extension's principal class. Refactor this structure to support retrieving the
- necessary pass data from the issuer's server.
+ This helper handles the networking/logic to get the encrypted pass 
+ from your bank's server.
  */
 struct PassResource {
     
-    static public func requestPaymentPassData(_ configuration: PKAddPaymentPassRequestConfiguration, certificateChain certificates: [Data],
-                                              nonce: Data, nonceSignature: Data) -> EncryptedPassDataResponse {
+    static public func requestPaymentPassData(
+        _ configuration: PKAddPaymentPassRequestConfiguration, 
+        certificateChain certificates: [Data],
+        nonce: Data, 
+        nonceSignature: Data
+    ) -> EncryptedPassDataResponse {
+        
+        // In production, this is where you would perform a URLSession 
+        // synchronous or asynchronous request to the AUB/KFH backend.
         
         var response = EncryptedPassDataResponse()
-        response.activationData = Data()
+        
+        // Placeholder empty data - replace with actual API response data
+        response.activationData = Data() 
         response.encryptedPassData = Data()
 
+        // Apple Pay ECC_V2 is the standard for modern Visa/Mastercard implementations
         if configuration.encryptionScheme == .ECC_V2 {
             response.ephemeralPublicKey = Data()
         } else if configuration.encryptionScheme == .RSA_V2 {
