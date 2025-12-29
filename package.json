@@ -1,36 +1,14 @@
 {
-  "name": "cordova-plugin-wallet-extension-cards",
-  "version": "1.0.0",
-  "description": "Cordova plugin for Wallet Extensions to add payment cards",
-  "license": "MIT",
-  "keywords": [
-    "cordova",
-    "wallet",
-    "extension",
-    "passkit",
-    "cards",
-    "ios"
-  ],
-  "author": "HARI KRISHNAN <hkrishnan254@gmail.com>",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/your-repo/cordova-plugin-wallet-extension-cards.git" },
-  "bugs": {
-    "url": "https://github.com/harikrir/cordova-plugin-wallet-extension-cards/issues" },
-  "homepage": "https://github.com/harikrir/cordova-plugin-wallet-extension-cards%23readme",
-  "cordova": {
-    "id": "cordova-plugin-wallet-extension-cards",
-    "platforms": [
-      "ios"
-    ]
-  },
-  "engines": {
-    "cordova": ">=10.0.0",
-    "cordova-ios": ">=6.0.0"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "dependencies": {},
-  "devDependencies": {}
+ "name": "com-kfh-wallet-plugin",
+ "version": "1.0.0",
+ "description": "KFH Wallet Plugin with Extension Support",
+ "cordova": {
+   "id": "com-kfh-wallet-plugin",
+   "platforms": [
+     "ios"
+   ]
+ },
+ "dependencies": {
+   "xcode": "^3.0.1"
+ }
 }
