@@ -1,9 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="kfh-wallet-plugin" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="kfh-wallet-plugin" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0">
 <name>KFH Wallet Extension</name>
-<description>KFH Apple Wallet Provisioning Plugin for OutSystems MABS</description>
-<license>Apache 2.0</license>
-<keywords>cordova,apple,wallet,provisioning,outsystems</keywords>
 <js-module name="KFHWalletPlugin" src="www/kfhwallet.js">
 <clobbers target="KFHWalletPlugin" />
 </js-module>
@@ -14,15 +11,21 @@
 </feature>
 </config-file>
 <hook type="after_prepare" src="hooks/install_profiles.js" />
-<config-file target="*/Entitlements-Release.plist" parent="com.apple.security.application-groups">
-<array>
-<string>group.com.aub.mobilebanking.uat.bh</string>
-</array>
+<config-file target="*/Entitlements-Release.plist" parent="/">
+<dict>
+<key>com.apple.security.application-groups</key>
+<array><string>group.com.aub.mobilebanking.uat.bh</string></array>
+<key>com.apple.developer.payment-pass-provisioning</key>
+<true/>
+</dict>
 </config-file>
-<config-file target="*/Entitlements-Debug.plist" parent="com.apple.security.application-groups">
-<array>
-<string>group.com.aub.mobilebanking.uat.bh</string>
-</array>
+<config-file target="*/Entitlements-Debug.plist" parent="/">
+<dict>
+<key>com.apple.security.application-groups</key>
+<array><string>group.com.aub.mobilebanking.uat.bh</string></array>
+<key>com.apple.developer.payment-pass-provisioning</key>
+<true/>
+</dict>
 </config-file>
 <extension-target name="WNonUI" bundle-id="com.aub.mobilebanking.uat.bh.WNonUI">
 <config-file target="*-Info.plist" parent="NSExtension">
@@ -33,11 +36,21 @@
 <string>KFHWalletHandler</string>
 </dict>
 </config-file>
-<config-file target="*/Entitlements-Release.plist" parent="com.apple.security.application-groups">
+<config-file target="*/Entitlements-Release.plist" parent="/">
+<dict>
+<key>com.apple.security.application-groups</key>
 <array><string>group.com.aub.mobilebanking.uat.bh</string></array>
+<key>com.apple.developer.payment-pass-provisioning</key>
+<true/>
+</dict>
 </config-file>
-<config-file target="*/Entitlements-Debug.plist" parent="com.apple.security.application-groups">
+<config-file target="*/Entitlements-Debug.plist" parent="/">
+<dict>
+<key>com.apple.security.application-groups</key>
 <array><string>group.com.aub.mobilebanking.uat.bh</string></array>
+<key>com.apple.developer.payment-pass-provisioning</key>
+<true/>
+</dict>
 </config-file>
 </extension-target>
 <extension-target name="WUI" bundle-id="com.aub.mobilebanking.uat.bh.WUI">
@@ -49,11 +62,21 @@
 <string>KFHUIHandler</string>
 </dict>
 </config-file>
-<config-file target="*/Entitlements-Release.plist" parent="com.apple.security.application-groups">
+<config-file target="*/Entitlements-Release.plist" parent="/">
+<dict>
+<key>com.apple.security.application-groups</key>
 <array><string>group.com.aub.mobilebanking.uat.bh</string></array>
+<key>com.apple.developer.payment-pass-provisioning</key>
+<true/>
+</dict>
 </config-file>
-<config-file target="*/Entitlements-Debug.plist" parent="com.apple.security.application-groups">
+<config-file target="*/Entitlements-Debug.plist" parent="/">
+<dict>
+<key>com.apple.security.application-groups</key>
 <array><string>group.com.aub.mobilebanking.uat.bh</string></array>
+<key>com.apple.developer.payment-pass-provisioning</key>
+<true/>
+</dict>
 </config-file>
 </extension-target>
 <source-file src="src/ios/KFHWalletPlugin.swift" />
@@ -62,7 +85,5 @@
 <source-file src="src/ios/KFHModels.swift" />
 <resource-file src="src/ios/kfh_card_art.png" />
 <framework src="PassKit.framework" />
-<framework src="UIKit.framework" />
 </platform>
 </plugin>
- 
