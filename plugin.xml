@@ -15,27 +15,29 @@
             </feature>
         </config-file>
 
-        <config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.payment-pass-provisioning"><true/></config-file>
-        <config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning"><true/></config-file>
         <config-file target="*/Entitlements-Debug.plist" parent="com.apple.security.application-groups">
             <array><string>group.com.aub.mobilebanking.uat.bh</string></array>
         </config-file>
         <config-file target="*/Entitlements-Release.plist" parent="com.apple.security.application-groups">
             <array><string>group.com.aub.mobilebanking.uat.bh</string></array>
         </config-file>
+        <config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.payment-pass-provisioning"><true/></config-file>
+        <config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning"><true/></config-file>
 
         <source-file src="src/ios/AUBWalletPlugin.swift" />
         <source-file src="src/ios/AppGroupManager.swift" />
         <source-file src="src/ios/SharedModels.swift" />
         
         <source-file src="src/ios/WNonUIExt/WNonUIExtHandler.swift" target-dir="WNonUIExt" />
-        <resource-file src="src/ios/WNonUIExt/Info.plist" target-dir="WNonUIExt" />
+        <header-file src="src/ios/WNonUIExt/Info.plist" target-dir="WNonUIExt" />
+        <resource-file src="src/ios/WNonUIExt/WNonUIExt.entitlements" target-dir="WNonUIExt" />
+
         <source-file src="src/ios/WUIExt/WUIExtHandler.swift" target-dir="WUIExt" />
         <source-file src="src/ios/WUIExt/WUIExtView.swift" target-dir="WUIExt" />
-        <resource-file src="src/ios/WUIExt/Info.plist" target-dir="WUIExt" />
+        <header-file src="src/ios/WUIExt/Info.plist" target-dir="WUIExt" />
+        <resource-file src="src/ios/WUIExt/WUIExt.entitlements" target-dir="WUIExt" />
 
         <framework src="PassKit.framework" />
         <framework src="SwiftUI.framework" />
-        <framework src="WatchConnectivity.framework" />
     </platform>
 </plugin>
