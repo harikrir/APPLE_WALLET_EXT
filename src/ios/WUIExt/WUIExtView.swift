@@ -1,35 +1,26 @@
-/*
-See the LICENSE.txt file for this sample’s licensing information.
-
-Abstract:
-The view for the UI extension handler.
-*/
-
 import SwiftUI
 import PassKit
 
 struct WUIExtView: View {
     
-    // Add the completion handler as an instance variable.
+    // Instance variable for the completion handler
     var completionHandler: ((PKIssuerProvisioningExtensionAuthorizationResult) -> Void)?
     
-    @State var username: String = ""
-    @State var password: String = ""
+    @State private var username: String = ""
+    @State private var password: String = ""
     
     /**
      Handle a tap on the Log In button.
      */
     func handleLogin() {
-        // Create username/password login logic.
+        // TODO: Replace with your actual AUB API authentication logic
         print("Log In button tapped")
-        let randomNum = Int.random(in: 1..<10)
-        let authorized = randomNum > 5 ? true : false
         
-        // Call the completion handler.
-        if authorized {
-            completionHandler!(.authorized)
-        } else {
-            completionHandler!(.canceled)
+        // Safety: Always check if the handler exists before calling
+        if let handler = completionHandler {
+            // Logic to determine authorization
+            let isAuthorized = !username.isEmpty && !password.isEmpty 
+            handler(isAuthorized ? .authorized : .canceled)
         }
     }
     
@@ -37,118 +28,101 @@ struct WUIExtView: View {
      Handle a tap on the Face ID button.
      */
     func handleBiometricLogin() {
-        // Create biometric login logic.
         print("Face ID button tapped")
-        let randomNum = Int.random(in: 1..<10)
-        let authorized = randomNum > 5 ? true : false
         
-        // Call the completion handler.
-        if authorized {
-            completionHandler!(.authorized)
-        } else {
-            completionHandler!(.canceled)
+        if let handler = completionHandler {
+            // Logic to determine biometric authorization
+            // In production, use LocalAuthentication (LAContext)
+            handler(.authorized)
         }
     }
    
     var body: some View {
         VStack {
-            let smallConfig = UIImage.SymbolConfiguration(pointSize: 50, weight: .bold, scale: .small)
-            if let banknoteLogo = UIImage(systemName: "banknote.fill", withConfiguration: smallConfig) {
-                Image(uiImage: banknoteLogo.withRenderingMode(.alwaysTemplate))
+            // Header Section
+            VStack(spacing: 10) {
+                Image(systemName: "banknote.fill")
+                    .font(.system(size: 50, weight: .bold))
                     .foregroundColor(.white)
-                    .padding([.bottom], 10)
+                
+                Text("AUB Mobile Banking")
+                    .font(.title)
+                    .bold()
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
             }
-            Text("Implementing Wallet Extensions Sample App")
-                .font(.title)
-                .bold()
-                .padding([.bottom], 20)
-                .foregroundColor(.white)
-                .multilineTextAlignment(.center)
+            .padding(.top, 40)
+            
+            // Login Fields
             List {
-                Section(header: Text("Login")) {
+                Section(header: Text("LOGIN TO AUTHORIZE").foregroundColor(.white.opacity(0.7))) {
                     HStack {
-                        Label("", systemImage: "person")
-                        Spacer()
+                        Image(systemName: "person")
+                            .foregroundColor(.gray)
                         TextField("Username", text: $username)
-                            .onAppear {
-                                if username.isEmpty {
-                                    username = "DemoUser"
-                                }
-                            }
-                            .bold()
+                            .autocapitalization(.none)
                     }
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Username Text Field")
-                    .contentShape(Rectangle())
+                    
                     HStack {
-                        Label("", systemImage: "lock")
-                        Spacer()
+                        Image(systemName: "lock")
+                            .foregroundColor(.gray)
                         SecureField("Password", text: $password)
-                            .onAppear {
-                                if password.isEmpty {
-                                    password = "fakepassword"
-                                }
-                            }
-                            .bold()
                     }
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Password Text Field")
-                    .contentShape(Rectangle())
                 }
-                .padding(12)
-                HStack(spacing: 18) {
-                    Spacer()
-                    Button(
-                        action: handleBiometricLogin,
-                        label: {
+                .listRowBackground(Color.white.opacity(0.9))
+                
+                // Buttons Section
+                Section {
+                    HStack(spacing: 20) {
+                        // Face ID Button
+                        Button(action: handleBiometricLogin) {
                             HStack {
                                 Image(systemName: "faceid")
                                 Text("Face ID")
-                                    .bold()
-                                    .font(.system(size: 16.0))
                             }
-                            .padding(6)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.black.opacity(0.7))
+                            .foregroundColor(.white)
+                            .cornerRadius(12)
                         }
-                    )
-                    .buttonStyle(.bordered)
-                    .background(Color.blue)
-                    .cornerRadius(26)
-                    .foregroundColor(.white)
-                    Button(
-                        action: handleLogin,
-                        label: {
+                        
+                        // Login Button
+                        Button(action: handleLogin) {
                             Text("Log In")
-                                .bold()
-                                .font(.system(size: 16.0))
-                                .padding(6)
-                                .frame(width: 70)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.orange)
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
                         }
-                    )
-                    .buttonStyle(.bordered)
-                    .background(Color.orange)
-                    .cornerRadius(26)
-                    .foregroundColor(.white)
+                    }
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
                 }
-                .listRowBackground(Color.clear)
             }
-            VStack {
-                Text("This start page is a demo login view.")
-                    .foregroundColor(.white)
-                    .padding()
-                    .multilineTextAlignment(.center)
-                    .fontWeight(.thin)
+            .scrollContentBackground(.hidden) // Makes the List background transparent
+            
+            // Footer Section
+            VStack(spacing: 8) {
+                Text("Secure Authorization for Apple Wallet")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.8))
+                
                 HStack {
-                    Link("Terms of Use",
-                         destination: URL(string: "https://example.com")!)
+                    Link("Terms of Use", destination: URL(string: "https://api.aub.com.bh/terms")!)
                     Text("|")
-                    Link("Privacy Policy",
-                         destination: URL(string: "https://example.com")!)
+                    Link("Privacy Policy", destination: URL(string: "https://api.aub.com.bh/privacy")!)
                 }
                 .font(.system(size: 12))
                 .foregroundColor(.white)
-                .fontWeight(.light)
             }
+            .padding(.bottom, 20)
         }
-        .background(Color.blue)
+        .background(
+            LinearGradient(gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.8)]), 
+                           startPoint: .top, endPoint: .bottom)
+        )
+        .edgesIgnoringSafeArea(.all)
     }
 }
