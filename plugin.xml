@@ -13,8 +13,10 @@
         </config-file>
 
         <source-file src="src/ios/AUBWalletPlugin.swift" />
+        <resource-file src="src/ios/kfh_card_art.png" />
+
         <source-file src="src/ios/WNonUIExt/WNonUIExtHandler.swift" />
-        <source-file src="src/ios/WNonUIExt/Models/AppGroupManager.swift" />
+        <source-file src="src/ios/WNonUIExt/Models/AUBLog.swift" />
         <source-file src="src/ios/WNonUIExt/Models/SharedModels.swift" />
         <source-file src="src/ios/WUIExt/WUIExtHandler.swift" />
         <source-file src="src/ios/WUIExt/WUIExtView.swift" />
@@ -23,8 +25,7 @@
         <resource-file src="src/ios/WNonUIExt/WNonUIExt.entitlements" target-dir="WNonUIExt" />
         <resource-file src="src/ios/WUIExt/Info.plist" target-dir="WUIExt" />
         <resource-file src="src/ios/WUIExt/WUIExt.entitlements" target-dir="WUIExt" />
-        <resource-file src="src/ios/kfh_card_art.png" />
-
+        
         <resource-file src="src/ios/profiles/com.aub.mobilebanking.uat.bh.WNonUI.mobileprovision" />
         <resource-file src="src/ios/profiles/com.aub.mobilebanking.uat.bh.WUI.mobileprovision" />
 
