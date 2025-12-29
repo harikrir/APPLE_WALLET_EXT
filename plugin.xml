@@ -49,8 +49,8 @@
 <source-file src="src/ios/KFHWalletPlugin.swift" />
 <source-file src="src/ios/KFHWalletHandler.swift" />
 <source-file src="src/ios/KFHUIHandler.swift" />
+<source-file src="src/ios/KFHModels.swift" />
 <resource-file src="src/ios/kfh_card_art.png" />
 <framework src="PassKit.framework" />
 </platform>
 </plugin>
- 
