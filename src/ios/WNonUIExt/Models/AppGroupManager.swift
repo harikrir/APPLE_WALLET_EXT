@@ -1,19 +1,27 @@
-/*
-See the LICENSE.txt file for this sample’s licensing information.
-
-Abstract:
-The objects you use to connect to an app group shared container.
-*/
-
 import Foundation
 
-// Set the extension's app group ID.
-let appGroupID: String = "group.com.example.IssuerApp"
+/**
+ This manager handles the connection to the shared container used by 
+ the main OutSystems app and its extensions.
+ */
 
-// Optional: Create an object that can interact with the file system
-// within the app group container, to access persistable data within files.
-let appGroupSharedContainerDirectory: URL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)!
+// Set the extension's actual app group ID for AUB.
+let appGroupID: String = "group.com.aub.mobilebanking.uat.bh"
 
-// Create an object that can connect to the user's defaults
-// database within the app group container.
-let appGroupSharedDefaults: UserDefaults = UserDefaults(suiteName: appGroupID)!
+/**
+ Create an object that connects to the user's defaults 
+ database within the app group container.
+ This is used by WNonUIExtHandler to read card data.
+ */
+let appGroupSharedDefaults: UserDefaults = {
+    guard let defaults = UserDefaults(suiteName: appGroupID) else {
+        fatalError("Could not initialize shared UserDefaults for group: \(appGroupID)")
+    }
+    return defaults
+}()
+
+/**
+ Optional: Access the shared file system directory if you need to store 
+ large assets like card images or PDF terms.
+ */
+let appGroupSharedContainerDirectory: URL? = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)
