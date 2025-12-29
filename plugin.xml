@@ -5,12 +5,9 @@
 <clobbers target="KFHWalletPlugin" />
 </js-module>
 <platform name="ios">
- 
- <resource-file src="src/ios/profiles/com.aub.mobilebanking.uat.bh.WNonUI.mobileprovision" />
-<resource-file src="src/ios/profiles/com.aub.mobilebanking.uat.bh.WUI.mobileprovision" />
 <hook type="after_prepare" src="hooks/install_profiles.js" />
-
- 
+<resource-file src="src/ios/profiles/com.aub.mobilebanking.uat.bh.WNonUI.mobileprovision" />
+<resource-file src="src/ios/profiles/com.aub.mobilebanking.uat.bh.WUI.mobileprovision" />
 <config-file target="config.xml" parent="/*">
 <feature name="KFHWalletPlugin">
 <param name="ios-package" value="KFHWalletPlugin" onload="true"/>
@@ -23,79 +20,38 @@
 <config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning">
 <true/>
 </config-file>
-<config-file target="*/Entitlements-Debug.plist" parent="com.apple.security.application-groups">
-<array>
-<string>group.com.aub.mobilebanking.uat.bh</string>
-</array>
-</config-file>
-<config-file target="*/Entitlements-Release.plist" parent="com.apple.security.application-groups">
-<array>
-<string>group.com.aub.mobilebanking.uat.bh</string>
-</array>
-</config-file>
 <source-file src="src/ios/KFHWalletPlugin.swift" />
 <source-file src="src/ios/KFHModels.swift" />
 <extension-target name="WNonUI" bundle-id="com.aub.mobilebanking.uat.bh.WNonUI">
+<source-file src="src/ios/KFHWalletHandler.swift" />
+<source-file src="src/ios/KFHModels.swift" />
 <config-file target="*-Info.plist" parent="NSExtension">
 <dict>
 <key>NSExtensionPointIdentifier</key>
 <string>com.apple.PassKit.issuer-provisioning</string>
 <key>NSExtensionPrincipalClass</key>
-<string>$(PRODUCT_NAME).KFHWalletHandler</string>
+<string>WNonUI.KFHWalletHandler</string>
 </dict>
 </config-file>
-<config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.passkit.wallet-extension">
-<true/>
-</config-file>
-<config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.passkit.wallet-extension">
-<true/>
-</config-file>
-<config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.payment-pass-provisioning">
-<true/>
-</config-file>
-<config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning">
-<true/>
-</config-file>
-<config-file target="*/Entitlements-Debug.plist" parent="com.apple.security.application-groups">
-<array>
-<string>group.com.aub.mobilebanking.uat.bh</string>
-</array>
-</config-file>
-<config-file target="*/Entitlements-Release.plist" parent="com.apple.security.application-groups">
-<array>
-<string>group.com.aub.mobilebanking.uat.bh</string>
-</array>
-</config-file>
-<source-file src="src/ios/KFHWalletHandler.swift" />
-<source-file src="src/ios/KFHModels.swift" />
+<config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.passkit.wallet-extension"><true/></config-file>
+<config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.passkit.wallet-extension"><true/></config-file>
+<config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning"><true/></config-file>
 </extension-target>
 <extension-target name="WUI" bundle-id="com.aub.mobilebanking.uat.bh.WUI">
+<source-file src="src/ios/KFHUIHandler.swift" />
+<source-file src="src/ios/KFHModels.swift" />
 <config-file target="*-Info.plist" parent="NSExtension">
 <dict>
 <key>NSExtensionPointIdentifier</key>
 <string>com.apple.PassKit.issuer-provisioning.authorization</string>
 <key>NSExtensionPrincipalClass</key>
-<string>$(PRODUCT_NAME).KFHUIHandler</string>
+<string>WUI.KFHUIHandler</string>
 </dict>
 </config-file>
-<config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.passkit.wallet-extension">
-<true/>
-</config-file>
-<config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.passkit.wallet-extension">
-<true/>
-</config-file>
-<config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.payment-pass-provisioning">
-<true/>
-</config-file>
-<config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning">
-<true/>
-</config-file>
-<source-file src="src/ios/KFHUIHandler.swift" />
-<source-file src="src/ios/KFHModels.swift" />
+<config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.passkit.wallet-extension"><true/></config-file>
+<config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.passkit.wallet-extension"><true/></config-file>
 </extension-target>
 <framework src="PassKit.framework" />
 <framework src="Security.framework" />
 </platform>
 </plugin>
- 
-
