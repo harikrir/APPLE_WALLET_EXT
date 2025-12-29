@@ -1,11 +1,13 @@
 import Foundation
 
+// Used by the AUBWalletPlugin for the API response
 struct KFHEncryptionResponse: Codable {
     let activationData: String
     let encryptedPassData: String
     let ephemeralPublicKey: String
 }
 
+// Used by Extensions to read card data from the App Group
 struct ProvisioningCredential: Codable {
     let primaryAccountIdentifier: String
     let label: String
@@ -16,13 +18,10 @@ struct ProvisioningCredential: Codable {
     let assetName: String
 }
 
-class WatchConnectivitySession {
-    var isPaired: Bool = true // Simplified for extension logic
-}
-
+// Global logger helper
 class Logger {
-    func error(_ m: String) { print("ERR: \(m)") }
-    func notice(_ m: String) { print("NOT: \(m)") }
-    func warning(_ m: String) { print("WRN: \(m)") }
+    func error(_ msg: String) { print("AUB_ERROR: \(msg)") }
+    func warning(_ msg: String) { print("AUB_WARN: \(msg)") }
+    func notice(_ msg: String) { print("AUB_NOTICE: \(msg)") }
 }
 let log = Logger()
