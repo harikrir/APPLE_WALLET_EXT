@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" 
 
-        id="com-kfh-wallet-plugin"
+        id="com-kfh-wallet-plugin" 
 
         version="1.0.0">
 <name>KFH Wallet Plugin</name>
-<description>Apple Pay In-App Provisioning for KFH</description>
-<js-module src="www/KFHWalletPlugin.js" name="KFHWalletPlugin">
+<js-module src="www/KFHWallet.js" name="KFHWalletPlugin">
 <clobbers target="KFHWalletPlugin" />
 </js-module>
 <platform name="ios">
@@ -47,6 +46,7 @@
 </dict>
 </config-file>
 <source-file src="src/ios/KFHWalletHandler.swift" />
+<source-file src="src/ios/KFHModels.swift" />
 </extension-target>
 <extension-target name="WUI" bundle-id="com.aub.mobilebanking.uat.bh.WUI">
 <config-file target="*-Info.plist" parent="NSExtension">
@@ -68,6 +68,7 @@
 </dict>
 </config-file>
 <source-file src="src/ios/KFHUIHandler.swift" />
+<source-file src="src/ios/KFHModels.swift" />
 </extension-target>
 <framework src="PassKit.framework" />
 </platform>
