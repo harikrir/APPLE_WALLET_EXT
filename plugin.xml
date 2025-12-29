@@ -44,14 +44,6 @@
 <true/>
 </dict>
 </config-file>
-<config-file target="*/Entitlements-Debug.plist" parent="/">
-<dict>
-<key>com.apple.security.application-groups</key>
-<array><string>group.com.aub.mobilebanking.uat.bh</string></array>
-<key>com.apple.developer.payment-pass-provisioning</key>
-<true/>
-</dict>
-</config-file>
 </extension-target>
 <extension-target name="WUI" bundle-id="com.aub.mobilebanking.uat.bh.WUI">
 <config-file target="*-Info.plist" parent="NSExtension">
@@ -63,14 +55,6 @@
 </dict>
 </config-file>
 <config-file target="*/Entitlements-Release.plist" parent="/">
-<dict>
-<key>com.apple.security.application-groups</key>
-<array><string>group.com.aub.mobilebanking.uat.bh</string></array>
-<key>com.apple.developer.payment-pass-provisioning</key>
-<true/>
-</dict>
-</config-file>
-<config-file target="*/Entitlements-Debug.plist" parent="/">
 <dict>
 <key>com.apple.security.application-groups</key>
 <array><string>group.com.aub.mobilebanking.uat.bh</string></array>
