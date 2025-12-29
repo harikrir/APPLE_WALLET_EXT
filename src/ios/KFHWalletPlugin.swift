@@ -18,17 +18,11 @@ class KFHWalletPlugin : CDVPlugin, PKAddPaymentPassViewControllerDelegate {
 
     func setAuthToken(command: CDVInvokedUrlCommand) {
 
-        guard let token = command.arguments[0] as? String else {
-
-            self.commandDelegate.send(CDVPluginResult(status: CDVCommandStatus_ERROR), callbackId: command.callbackId)
-
-            return
-
-        }
+        let token = command.arguments[0] as? String
 
         UserDefaults(suiteName: groupID)?.set(token, forKey: "AUB_Auth_Token")
 
-        os_log("KFH_LOG: Token saved to App Group", log: logger, type: .info)
+        os_log("KFH_LOG: Auth token synchronized", log: logger, type: .info)
 
         self.commandDelegate.send(CDVPluginResult(status: CDVCommandStatus_OK), callbackId: command.callbackId)
 
@@ -44,9 +38,9 @@ class KFHWalletPlugin : CDVPlugin, PKAddPaymentPassViewControllerDelegate {
 
               let cardName = command.arguments[1] as? String else { return }
 
-        if !PKAddPaymentPassViewController.canAddPaymentPass() {
+        guard PKAddPaymentPassViewController.canAddPaymentPass() else {
 
-            self.commandDelegate.send(CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: "Unsupported Device"), callbackId: self.currentCallbackId)
+            self.commandDelegate.send(CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: "Unsupported"), callbackId: self.currentCallbackId)
 
             return
 
@@ -114,7 +108,7 @@ class KFHWalletPlugin : CDVPlugin, PKAddPaymentPassViewControllerDelegate {
 
                 addRequest.ephemeralPublicKey = Data(base64Encoded: res.ephemeralPublicKey)
 
-                os_log("KFH_LOG: Provisioning data received", log: self.logger, type: .info)
+                os_log("KFH_LOG: Received encrypted payload", log: self.logger, type: .info)
 
             }
 
