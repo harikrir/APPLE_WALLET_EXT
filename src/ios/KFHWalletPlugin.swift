@@ -2,15 +2,13 @@ import Foundation
 
 import PassKit
 
-import OSLog // Modern logging framework
+import OSLog
 
 @objc(KFHWalletPlugin)
 
 class KFHWalletPlugin : CDVPlugin, PKAddPaymentPassViewControllerDelegate {
 
     var currentCallbackId: String?
-
-    // Create a Logger instance instead of OSLog for better Swift integration
 
     private let logger = Logger(subsystem: "com.aub.mobilebanking.uat.bh", category: "Plugin")
 
@@ -20,17 +18,13 @@ class KFHWalletPlugin : CDVPlugin, PKAddPaymentPassViewControllerDelegate {
 
     func setAuthToken(command: CDVInvokedUrlCommand) {
 
-        // Handle optional safely
-
         let token = command.arguments[0] as? String ?? "NIL"
 
         UserDefaults(suiteName: groupID)?.set(token, forKey: "AUB_Auth_Token")
 
-        // Use privacy: .public to ensure you can see the token in Console.app
+        // Using .notice and privacy: .public ensures this is visible in Mac Console
 
-        // Use .notice or .error level to ensure visibility in release builds
-
-        logger.notice("KFH_LOG: Auth token synchronized for token: \(token, privacy: .public)")
+        logger.notice("KFH_LOG: [Plugin] Auth token saved: \(token, privacy: .public)")
 
         self.commandDelegate.send(CDVPluginResult(status: CDVCommandStatus_OK), callbackId: command.callbackId)
 
@@ -44,19 +38,19 @@ class KFHWalletPlugin : CDVPlugin, PKAddPaymentPassViewControllerDelegate {
 
         guard let cardId = command.arguments[0] as? String,
 
-              let cardName = command.arguments[1] as? String else { 
+              let cardName = command.arguments[1] as? String else {
 
-            logger.error("KFH_LOG: Missing arguments in startProvisioning")
+            logger.error("KFH_LOG: [Plugin] Error - Missing startProvisioning arguments")
 
-            return 
+            return
 
         }
 
-        logger.notice("KFH_LOG: Starting provisioning for Card: \(cardName, privacy: .public)")
+        logger.notice("KFH_LOG: [Plugin] Starting UI for card: \(cardName, privacy: .public)")
 
         guard PKAddPaymentPassViewController.canAddPaymentPass() else {
 
-            logger.error("KFH_LOG: Device does not support Apple Pay provisioning")
+            logger.error("KFH_LOG: [Plugin] Error - Device/Region not supported for Apple Pay")
 
             self.commandDelegate.send(CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: "Unsupported"), callbackId: self.currentCallbackId)
 
@@ -78,19 +72,25 @@ class KFHWalletPlugin : CDVPlugin, PKAddPaymentPassViewControllerDelegate {
 
             self.viewController.present(vc, animated: true)
 
+        } else {
+
+            logger.error("KFH_LOG: [Plugin] Error - Failed to initialize PKAddPaymentPassViewController (Check Entitlements)")
+
         }
 
     }
 
+    // This method is called by Apple when it's time to encrypt the card data
+
     func addPaymentPassViewController(_ controller: PKAddPaymentPassViewController, generateRequestWithCertificateChain certificates: [Data], nonce: Data, nonceSignature: Data, completionHandler: @escaping (PKAddPaymentPassRequest) -> Void) {
 
-        logger.notice("KFH_LOG: Apple requested encryption keys")
+        logger.notice("KFH_LOG: [Plugin] Encryption request triggered by Apple")
 
         guard let token = UserDefaults(suiteName: groupID)?.string(forKey: "AUB_Auth_Token"),
 
               let cardId = UserDefaults(suiteName: groupID)?.string(forKey: "ACTIVE_CARD_ID") else {
 
-            logger.error("KFH_LOG: Failed to retrieve Token or CardID from App Group")
+            logger.error("KFH_LOG: [Plugin] Error - Missing token or cardId in App Group")
 
             completionHandler(PKAddPaymentPassRequest()); return
 
@@ -108,7 +108,9 @@ class KFHWalletPlugin : CDVPlugin, PKAddPaymentPassViewControllerDelegate {
 
         ]
 
-        var request = URLRequest(url: URL(string: "https://api.aub.com.bh/v1/wallet/encrypt")!)
+        let urlString = "https://api.aub.com.bh/v1/wallet/encrypt"
+
+        var request = URLRequest(url: URL(string: urlString)!)
 
         request.httpMethod = "POST"
 
@@ -118,15 +120,31 @@ class KFHWalletPlugin : CDVPlugin, PKAddPaymentPassViewControllerDelegate {
 
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
 
-        URLSession.shared.dataTask(with: request as URLRequest) { [weak self] data, _, error in
+        // Log the Request Details
+
+        if let bodyData = request.httpBody, let bodyString = String(data: bodyData, encoding: .utf8) {
+
+            logger.notice("KFH_LOG: [Plugin] POST \(urlString, privacy: .public)")
+
+            logger.notice("KFH_LOG: [Plugin] Request Body: \(bodyString, privacy: .public)")
+
+        }
+
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
 
             guard let self = self else { return }
 
             let addRequest = PKAddPaymentPassRequest()
 
-            if let error = error {
+            if let httpResponse = response as? HTTPURLResponse {
 
-                self.logger.error("KFH_LOG: Network Error: \(error.localizedDescription, privacy: .public)")
+                self.logger.notice("KFH_LOG: [Plugin] Encryption API Status: \(httpResponse.statusCode, privacy: .public)")
+
+            }
+
+            if let data = data, let jsonStr = String(data: data, encoding: .utf8) {
+
+                self.logger.notice("KFH_LOG: [Plugin] Encryption API Response: \(jsonStr, privacy: .public)")
 
             }
 
@@ -138,11 +156,11 @@ class KFHWalletPlugin : CDVPlugin, PKAddPaymentPassViewControllerDelegate {
 
                 addRequest.ephemeralPublicKey = Data(base64Encoded: res.ephemeralPublicKey)
 
-                self.logger.notice("KFH_LOG: Successfully received encrypted payload from KFH API")
+                self.logger.notice("KFH_LOG: [Plugin] Successfully prepared PKAddPaymentPassRequest")
 
             } else {
 
-                self.logger.error("KFH_LOG: Failed to parse encryption response")
+                self.logger.error("KFH_LOG: [Plugin] Error - Failed to parse encryption response")
 
             }
 
@@ -156,11 +174,11 @@ class KFHWalletPlugin : CDVPlugin, PKAddPaymentPassViewControllerDelegate {
 
         if let error = error {
 
-            logger.error("KFH_LOG: Finished with error: \(error.localizedDescription, privacy: .public)")
+            logger.error("KFH_LOG: [Plugin] Flow finished with error: \(error.localizedDescription, privacy: .public)")
 
         } else {
 
-            logger.notice("KFH_LOG: Finished successfully. Pass added: \(pass != nil)")
+            logger.notice("KFH_LOG: [Plugin] Flow finished successfully. Card added: \(pass != nil, privacy: .public)")
 
         }
 
