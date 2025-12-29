@@ -38,11 +38,22 @@
 <string>$(PRODUCT_NAME).KFHWalletHandler</string>
 </dict>
 </config-file>
+<config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.passkit.wallet-extension">
+<true/>
+</config-file>
+<config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.passkit.wallet-extension">
+<true/>
+</config-file>
 <config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.payment-pass-provisioning">
 <true/>
 </config-file>
 <config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning">
 <true/>
+</config-file>
+<config-file target="*/Entitlements-Debug.plist" parent="com.apple.security.application-groups">
+<array>
+<string>group.com.aub.mobilebanking.uat.bh</string>
+</array>
 </config-file>
 <config-file target="*/Entitlements-Release.plist" parent="com.apple.security.application-groups">
 <array>
@@ -61,6 +72,15 @@
 <string>$(PRODUCT_NAME).KFHUIHandler</string>
 </dict>
 </config-file>
+<config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.passkit.wallet-extension">
+<true/>
+</config-file>
+<config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.passkit.wallet-extension">
+<true/>
+</config-file>
+<config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.payment-pass-provisioning">
+<true/>
+</config-file>
 <config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning">
 <true/>
 </config-file>
@@ -72,4 +92,3 @@
 </platform>
 </plugin>
  
-
