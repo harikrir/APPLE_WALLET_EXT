@@ -12,20 +12,26 @@ module.exports = function(context) {
 
     const teamID = "T57RH2WT3W";
     const extensions = [
-        { name: 'WNonUIExt', id: 'com.aub.mobilebanking.uat.bh.WNonUI', dir: 'WNonUIExt', plist: 'WNonUIExt/Info.plist', ent: 'WNonUIExt/WNonUIExt.entitlements' },
-        { name: 'WUIExt', id: 'com.aub.mobilebanking.uat.bh.WUI', dir: 'WUIExt', plist: 'WUIExt/Info.plist', ent: 'WUIExt/WUIExt.entitlements' }
+        { name: 'WNonUIExt', id: 'com.aub.mobilebanking.uat.bh.WNonUI', dir: 'WNonUIExt' },
+        { name: 'WUIExt', id: 'com.aub.mobilebanking.uat.bh.WUI', dir: 'WUIExt' }
     ];
 
     extensions.forEach(ext => {
-        proj.addTarget(ext.name, 'app_extension', ext.dir);
+        // Create the Extension Target
+        const target = proj.addTarget(ext.name, 'app_extension', ext.dir);
+        
+        // Build Settings
         proj.addBuildProperty('PRODUCT_BUNDLE_IDENTIFIER', ext.id, null, ext.name);
         proj.addBuildProperty('DEVELOPMENT_TEAM', teamID, null, ext.name);
-        proj.addBuildProperty('INFOPLIST_FILE', ext.plist, null, ext.name);
-        proj.addBuildProperty('CODE_SIGN_ENTITLEMENTS', ext.ent, null, ext.name);
-        proj.addBuildProperty('IPHONEOS_DEPLOYMENT_TARGET', '14.0', null, ext.name);
+        proj.addBuildProperty('INFOPLIST_FILE', path.join(ext.dir, 'Info.plist'), null, ext.name);
+        proj.addBuildProperty('CODE_SIGN_ENTITLEMENTS', path.join(ext.dir, ext.name + '.entitlements'), null, ext.name);
         proj.addBuildProperty('SWIFT_VERSION', '5.0', null, ext.name);
+        proj.addBuildProperty('IPHONEOS_DEPLOYMENT_TARGET', '14.0', null, ext.name);
+        
+        // Ensure standard libraries are available
+        proj.addBuildProperty('LD_RUNPATH_SEARCH_PATHS', '"$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"', null, ext.name);
     });
 
     fs.writeFileSync(projectPath, proj.writeSync());
-    console.log('✔ Extensions Hooked Successfully.');
+    console.log('✔ Successfully created Wallet Extension targets.');
 };
