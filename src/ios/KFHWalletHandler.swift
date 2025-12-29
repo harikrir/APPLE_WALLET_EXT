@@ -2,7 +2,7 @@ import Foundation
 
 import PassKit
 
-import os.log
+import OSLog // Modern logging framework
 
 @objc(KFHWalletHandler)
 
@@ -10,11 +10,15 @@ class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
 
     private let groupID = "group.com.aub.mobilebanking.uat.bh"
 
-    private let logger = OSLog(subsystem: "com.aub.mobilebanking.uat.bh", category: "Extension")
+    // Use Logger instead of OSLog for better Swift support
+
+    private let logger = Logger(subsystem: "com.aub.mobilebanking.uat.bh", category: "Extension")
 
     override func status(completion: @escaping (PKIssuerProvisioningExtensionStatus) -> Void) {
 
-        os_log("KFH_LOG: Status check started", log: logger, type: .info)
+        // Use .notice or .error level so the log isn't discarded by MABS/iOS
+
+        logger.notice("KFH_LOG: Status check started")
 
         let status = PKIssuerProvisioningExtensionStatus()
 
@@ -26,7 +30,9 @@ class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
 
         status.requiresAuthentication = (token == nil)
 
-        os_log("KFH_LOG: Status auth required: %{public}@", log: logger, type: .info, String(status.requiresAuthentication))
+        // Use privacy: .public so the actual value shows in Console.app
+
+        logger.notice("KFH_LOG: Status auth required: \(status.requiresAuthentication, privacy: .public)")
 
         completion(status)
 
@@ -34,11 +40,11 @@ class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
 
     override func passEntries(completion: @escaping ([PKIssuerProvisioningExtensionPassEntry]) -> Void) {
 
-        os_log("KFH_LOG: Fetching pass entries...", log: logger, type: .info)
+        logger.notice("KFH_LOG: Fetching pass entries...")
 
         guard let token = UserDefaults(suiteName: groupID)?.string(forKey: "AUB_Auth_Token") else {
 
-            os_log("KFH_LOG: Error - No token found in App Group", log: logger, type: .error)
+            logger.error("KFH_LOG: Error - No token found in App Group")
 
             completion([]); return
 
@@ -54,7 +60,7 @@ class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
 
             if let error = error {
 
-                os_log("KFH_LOG: API Error: %{public}@", log: self.logger, type: .error, error.localizedDescription)
+                self.logger.error("KFH_LOG: API Error: \(error.localizedDescription, privacy: .public)")
 
                 completion([]); return
 
@@ -62,7 +68,7 @@ class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
 
             guard let data = data, let cards = try? JSONDecoder().decode([KFHCardEntry].self, from: data) else {
 
-                os_log("KFH_LOG: Error parsing cards JSON", log: self.logger, type: .error)
+                self.logger.error("KFH_LOG: Error parsing cards JSON")
 
                 completion([]); return
 
@@ -70,13 +76,11 @@ class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
 
             let cardArt = UIImage(named: "kfh_card_art")?.cgImage ?? UIImage().cgImage!
 
-            // Fix: Use compactMap to handle potential nil configurations and cast to base class
-
             let entries: [PKIssuerProvisioningExtensionPassEntry] = cards.compactMap { card in
 
-                guard let config = PKAddPaymentPassRequestConfiguration(encryptionScheme: .ECC_V2) else { 
+                guard let config = PKAddPaymentPassRequestConfiguration(encryptionScheme: .ECC_V2) else {
 
-                    return nil 
+                    return nil
 
                 }
 
@@ -100,7 +104,7 @@ class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
 
             }
 
-            os_log("KFH_LOG: Returning %d entries to Wallet", log: self.logger, type: .info, entries.count)
+            self.logger.notice("KFH_LOG: Returning \(entries.count, privacy: .public) entries to Wallet")
 
             completion(entries)
 
