@@ -4,51 +4,75 @@ import PassKit
 
 import OSLog
 
-@objc // Essential for the $(PRODUCT_NAME) namespacing in plugin.xml
+import UIKit
+
+@objc
 
 class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
 
-    private let logger = Logger(subsystem: "com.aub.mobilebanking.uat.bh", category: "Extension")
+    private let logger = Logger(
+
+        subsystem: "com.aub.mobilebanking.uat.bh",
+
+        category: "IssuerProvisioning"
+
+    )
 
     private let groupID = "group.com.aub.mobilebanking.uat.bh"
 
-    // 1. Apple calls this FIRST to see if your app should be listed in Wallet
+    // MARK: - 1️⃣ Status
 
     override func status(completion: @escaping (PKIssuerProvisioningExtensionStatus) -> Void) {
 
-        logger.notice("KFH_LOG: Wallet App invoked status()")
+        logger.notice("KFH_LOG: status() called")
 
         let status = PKIssuerProvisioningExtensionStatus()
 
-        // FOR TESTING: Force these to true. 
+        // Wallet visibility
 
-        // If these are false, Apple Wallet will HIDE your app.
+        status.passEntriesAvailable = PKAddPaymentPassViewController.canAddPaymentPass()
 
-        status.passEntriesAvailable = true
+        status.remotePassEntriesAvailable = status.passEntriesAvailable
 
-        status.remotePassEntriesAvailable = true
+        // Auth check via App Group
 
-        // Check authentication via App Group
+        let token = UserDefaults(suiteName: groupID)?
 
-        let token = UserDefaults(suiteName: groupID)?.string(forKey: "AUB_Auth_Token")
+            .string(forKey: "AUB_Auth_Token")
 
         status.requiresAuthentication = (token == nil)
 
-        logger.notice("KFH_LOG: Status sent. Auth required: \(status.requiresAuthentication)")
+        logger.notice("KFH_LOG: requiresAuth = \(status.requiresAuthentication)")
 
         completion(status)
 
     }
 
-    // 2. Apple calls this SECOND to get the list of cards
+    // MARK: - 2️⃣ Available Cards
 
-    override func passEntries(completion: @escaping ([PKIssuerProvisioningExtensionPassEntry]) -> Void) {
+    override func passEntries(
 
-        logger.notice("KFH_LOG: Wallet App invoked passEntries()")
+        completion: @escaping ([PKIssuerProvisioningExtensionPassEntry]) -> Void
 
-        // Mocking one card entry to guarantee the UI shows something
+    ) {
 
-        let config = PKAddPaymentPassRequestConfiguration(encryptionScheme: .ECC_V2)!
+        logger.notice("KFH_LOG: passEntries() called")
+
+        guard PKAddPaymentPassViewController.canAddPaymentPass() else {
+
+            logger.error("KFH_LOG: Device cannot add payment passes")
+
+            completion([])
+
+            return
+
+        }
+
+        let config = PKAddPaymentPassRequestConfiguration(
+
+            encryptionScheme: .ECC_V2
+
+        )!
 
         config.primaryAccountSuffix = "1234"
 
@@ -56,17 +80,29 @@ class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
 
         config.cardholderName = "KFH User"
 
-        // Ensure this image name exists in your Resources/Assets
+        guard
 
-        let cardArt = UIImage(named: "kfh_card_art")?.cgImage ?? UIImage().cgImage!
+            let image = UIImage(named: "kfh_card_art"),
+
+            let cgImage = image.cgImage
+
+        else {
+
+            logger.error("KFH_LOG: Missing card art image")
+
+            completion([])
+
+            return
+
+        }
 
         let entry = PKIssuerProvisioningExtensionPaymentPassEntry(
 
-            identifier: "card_01",
+            identifier: "kfh_card_01",
 
             title: "KFH Visa Gold",
 
-            art: cardArt,
+            art: cgImage,
 
             addRequestConfiguration: config
 
@@ -76,7 +112,7 @@ class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
 
     }
 
-    // 3. Apple calls this THIRD when the user clicks "Add"
+    // MARK: - 3️⃣ Provisioning Handshake
 
     override func generateAddPaymentPassRequestForPassEntryWithIdentifier(
 
@@ -90,15 +126,33 @@ class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
 
         nonceSignature: Data,
 
-        completionHandler completion: @escaping (PKAddPaymentPassRequest?) -> Void) {
+        completionHandler completion: @escaping (PKAddPaymentPassRequest?) -> Void
 
-        logger.notice("KFH_LOG: Handshake started for \(identifier)")
+    ) {
 
-        // This is where you call your backend. 
+        logger.notice("KFH_LOG: generateAddPaymentPassRequest() for \(identifier)")
 
-        // For the first test, just logging the call is enough.
+        // 🔐 Normally:
 
-        completion(nil) 
+        // 1. Send certificates + nonce + signature to backend
+
+        // 2. Backend calls Apple Pay servers
+
+        // 3. Backend returns encrypted payloads
+
+        // ✅ MOCK RESPONSE (for first Wallet visibility & testing)
+
+        let request = PKAddPaymentPassRequest()
+
+        request.activationData = Data()
+
+        request.encryptedPassData = Data()
+
+        request.ephemeralPublicKey = Data()
+
+        logger.notice("KFH_LOG: Returning mock PKAddPaymentPassRequest")
+
+        completion(request)
 
     }
 
