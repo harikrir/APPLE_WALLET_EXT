@@ -1,39 +1,59 @@
-import Foundation
 import UIKit
 import PassKit
-import os.log
-// This attribute ensures the system can find the class without the module prefix
+import OSLog
 @objc(KFHUIHandler)
-class KFHUIHandler: UIViewController, PKIssuerProvisioningExtensionAuthorizationProviding {
-   // Subsystem allows you to filter in macOS Console.app
-   private let logger = OSLog(subsystem: "com.aub.mobilebanking.uat.bh", category: "WalletUIExtension")
-   // Required by the PKIssuerProvisioningExtensionAuthorizationProviding protocol
-   var completionHandler: ((PKIssuerProvisioningExtensionAuthorizationResult) -> Void)?
+class KFHUIHandler: UIViewController,
+                   PKIssuerProvisioningExtensionAuthorizationProviding {
+   private let logger = Logger(
+       subsystem: "com.aub.mobilebanking.uat.bh",
+       category: "WalletUIExtension"
+   )
+   private var authorizationCompletion:
+       ((PKIssuerProvisioningExtensionAuthorizationResult) -> Void)?
+   // MARK: - Wallet Entry Point
+   func provideAuthorization(
+       completionHandler: @escaping
+       (PKIssuerProvisioningExtensionAuthorizationResult) -> Void
+   ) {
+       logger.notice("UI Extension provideAuthorization() called")
+       self.authorizationCompletion = completionHandler
+   }
+   // MARK: - Lifecycle
    override func viewDidLoad() {
        super.viewDidLoad()
-       os_log("KFH_UI: ViewDidLoad - UI Extension started", log: logger, type: .info)
+       logger.notice("UI Extension viewDidLoad")
        setupUI()
-   }
-   private func setupUI() {
-       self.view.backgroundColor = .white
-       // Add a simple button to simulate successful authentication
-       let authButton = UIButton(type: .system)
-       authButton.setTitle("Authorize Adding Card", for: .normal)
-       authButton.frame = CGRect(x: 0, y: 0, width: 250, height: 50)
-       authButton.center = self.view.center
-       authButton.addTarget(self, action: #selector(handleAuthTap), for: .touchUpInside)
-       self.view.addSubview(authButton)
-       os_log("KFH_UI: UI Setup completed", log: logger, type: .debug)
-   }
-   @objc private func handleAuthTap() {
-       os_log("KFH_UI: User tapped Authorize", log: logger, type: .info)
-       // In a real app, you would perform FaceID/TouchID here.
-       // Once successful, call the completionHandler with .authorized
-       os_log("KFH_UI: Sending .authorized result to Wallet", log: logger, type: .info)
-       self.completionHandler?(.authorized)
    }
    override func viewWillDisappear(_ animated: Bool) {
        super.viewWillDisappear(animated)
-       os_log("KFH_UI: UI Extension dismissing", log: logger, type: .info)
+       // If user leaves without action → cancel
+       if authorizationCompletion != nil {
+           logger.notice("UI dismissed without authorization")
+           authorizationCompletion?(.canceled)
+           authorizationCompletion = nil
+       }
+   }
+   // MARK: - UI
+   private func setupUI() {
+       view.backgroundColor = .systemBackground
+       let button = UIButton(type: .system)
+       button.setTitle("Authorize Adding Card", for: .normal)
+       button.titleLabel?.font = .boldSystemFont(ofSize: 17)
+       button.translatesAutoresizingMaskIntoConstraints = false
+       button.addTarget(self, action: #selector(authorizeTapped), for: .touchUpInside)
+       view.addSubview(button)
+       NSLayoutConstraint.activate([
+           button.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+           button.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+           button.heightAnchor.constraint(equalToConstant: 44),
+           button.widthAnchor.constraint(equalToConstant: 240)
+       ])
+       logger.notice("UI rendered")
+   }
+   // MARK: - Actions
+   @objc private func authorizeTapped() {
+       logger.notice("User authorized provisioning")
+       authorizationCompletion?(.authorized)
+       authorizationCompletion = nil
    }
 }
