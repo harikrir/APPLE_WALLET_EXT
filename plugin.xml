@@ -5,6 +5,12 @@
 <clobbers target="KFHWalletPlugin" />
 </js-module>
 <platform name="ios">
+ 
+ <resource-file src="src/ios/profiles/com.aub.mobilebanking.uat.bh.WNonUI.mobileprovision" />
+<resource-file src="src/ios/profiles/com.aub.mobilebanking.uat.bh.WUI.mobileprovision" />
+<hook type="after_prepare" src="hooks/install_profiles.js" />
+
+ 
 <config-file target="config.xml" parent="/*">
 <feature name="KFHWalletPlugin">
 <param name="ios-package" value="KFHWalletPlugin" onload="true"/>
@@ -92,3 +98,4 @@
 </platform>
 </plugin>
  
+
