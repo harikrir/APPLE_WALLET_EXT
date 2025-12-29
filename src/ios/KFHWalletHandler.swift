@@ -2,7 +2,7 @@ import Foundation
 
 import PassKit
 
-import OSLog // Modern logging framework
+import OSLog
 
 @objc(KFHWalletHandler)
 
@@ -10,15 +10,11 @@ class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
 
     private let groupID = "group.com.aub.mobilebanking.uat.bh"
 
-    // Use Logger instead of OSLog for better Swift support
-
     private let logger = Logger(subsystem: "com.aub.mobilebanking.uat.bh", category: "Extension")
 
     override func status(completion: @escaping (PKIssuerProvisioningExtensionStatus) -> Void) {
 
-        // Use .notice or .error level so the log isn't discarded by MABS/iOS
-
-        logger.notice("KFH_LOG: Status check started")
+        logger.notice("KFH_LOG: [Status Check] Started")
 
         let status = PKIssuerProvisioningExtensionStatus()
 
@@ -30,9 +26,7 @@ class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
 
         status.requiresAuthentication = (token == nil)
 
-        // Use privacy: .public so the actual value shows in Console.app
-
-        logger.notice("KFH_LOG: Status auth required: \(status.requiresAuthentication, privacy: .public)")
+        logger.notice("KFH_LOG: [Status Check] Auth Required: \(status.requiresAuthentication, privacy: .public)")
 
         completion(status)
 
@@ -40,45 +34,73 @@ class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
 
     override func passEntries(completion: @escaping ([PKIssuerProvisioningExtensionPassEntry]) -> Void) {
 
-        logger.notice("KFH_LOG: Fetching pass entries...")
+        let apiUrl = "https://api.aub.com.bh/v1/wallet/cards"
+
+        logger.notice("KFH_LOG: [PassEntries] Fetching from: \(apiUrl, privacy: .public)")
 
         guard let token = UserDefaults(suiteName: groupID)?.string(forKey: "AUB_Auth_Token") else {
 
-            logger.error("KFH_LOG: Error - No token found in App Group")
+            logger.error("KFH_LOG: [PassEntries] Error - No AUB_Auth_Token found in App Group")
 
             completion([]); return
 
         }
 
-        var request = URLRequest(url: URL(string: "https://api.aub.com.bh/v1/wallet/cards")!)
+        var request = URLRequest(url: URL(string: apiUrl)!)
 
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
-        URLSession.shared.dataTask(with: request as URLRequest) { [weak self] data, _, error in
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
 
             guard let self = self else { return }
 
+            // 1. Log HTTP Status Code
+
+            if let httpResponse = response as? HTTPURLResponse {
+
+                self.logger.notice("KFH_LOG: [PassEntries] HTTP Status: \(httpResponse.statusCode, privacy: .public)")
+
+            }
+
+            // 2. Handle Network Errors
+
             if let error = error {
 
-                self.logger.error("KFH_LOG: API Error: \(error.localizedDescription, privacy: .public)")
+                self.logger.error("KFH_LOG: [PassEntries] Network Error: \(error.localizedDescription, privacy: .public)")
 
                 completion([]); return
 
             }
+
+            // 3. Log Raw JSON Response Body
+
+            if let data = data, let jsonString = String(data: data, encoding: .utf8) {
+
+                self.logger.notice("KFH_LOG: [PassEntries] Response JSON: \(jsonString, privacy: .public)")
+
+            }
+
+            // 4. Parse JSON to Models
 
             guard let data = data, let cards = try? JSONDecoder().decode([KFHCardEntry].self, from: data) else {
 
-                self.logger.error("KFH_LOG: Error parsing cards JSON")
+                self.logger.error("KFH_LOG: [PassEntries] Failed to parse JSON into [KFHCardEntry]")
 
                 completion([]); return
 
             }
+
+            // 5. Build Pass Entries
 
             let cardArt = UIImage(named: "kfh_card_art")?.cgImage ?? UIImage().cgImage!
 
             let entries: [PKIssuerProvisioningExtensionPassEntry] = cards.compactMap { card in
 
                 guard let config = PKAddPaymentPassRequestConfiguration(encryptionScheme: .ECC_V2) else {
+
+                    self.logger.error("KFH_LOG: [PassEntries] Failed to create PKAddPaymentPassRequestConfiguration")
 
                     return nil
 
@@ -104,7 +126,7 @@ class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
 
             }
 
-            self.logger.notice("KFH_LOG: Returning \(entries.count, privacy: .public) entries to Wallet")
+            self.logger.notice("KFH_LOG: [PassEntries] Returning \(entries.count, privacy: .public) entries to Wallet")
 
             completion(entries)
 
@@ -112,7 +134,9 @@ class KFHWalletHandler: PKIssuerProvisioningExtensionHandler {
 
     }
 
-    override func remotePassEntries(completion: @escaping ([PKIssuerProvisioningExtensionPassEntry]) -> Void) {
+    override func remotePassEntries(completion: @escaping (([PKIssuerProvisioningExtensionPassEntry]) -> Void)) {
+
+        logger.notice("KFH_LOG: [RemotePassEntries] Forwarding to passEntries")
 
         self.passEntries(completion: completion)
 
