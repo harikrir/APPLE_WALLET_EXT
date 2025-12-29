@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="com-kfh-wallet-plugin" version="1.0.0">
 <name>KFH Wallet Plugin</name>
-<js-module src="www/KFHWalletPlugin.js" name="KFHWalletPlugin">
+<js-module src="www/KFHWallet.js" name="KFHWalletPlugin">
 <clobbers target="KFHWalletPlugin" />
 </js-module>
 <platform name="ios">
@@ -72,3 +72,4 @@
 </platform>
 </plugin>
  
+
