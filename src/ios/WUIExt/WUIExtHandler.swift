@@ -1,50 +1,48 @@
-/*
-See the LICENSE.txt file for this sample’s licensing information.
-
-Abstract:
-The UI extension that performs authentication of the user if the non-UI extension reports that authentication is required.
-*/
-
 import UIKit
 import SwiftUI
 import PassKit
 
 /**
- The UI extension's principal class.
+ The UI extension's principal class for AUB Wallet.
+ This controller hosts the SwiftUI view used for user authentication.
  */
 class WUIExtHandler: UIViewController, PKIssuerProvisioningExtensionAuthorizationProviding {
 
+    // MARK: - PKIssuerProvisioningExtensionAuthorizationProviding
+    
+    /// The completion handler provided by the system to report the result of the authorization.
     var completionHandler: ((PKIssuerProvisioningExtensionAuthorizationResult) -> Void)?
     
-    /**
-     Call this method after the view controller loads its view hierarchy into memory.
-     */
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Create an instance of the SwiftUI view.
-        // Pass the completion handler to the SwiftUI view.
+        // 1. Initialize the SwiftUI View (WUIExtView)
+        // Ensure WUIExtView is defined to accept the completionHandler
         let swiftUIView = WUIExtView(completionHandler: completionHandler)
         
-        // Create a `UIHostingController` with the extension's SwiftUI view as
-        // its root view.
+        // 2. Create a UIHostingController to bridge SwiftUI into UIKit
         let controller = UIHostingController(rootView: swiftUIView)
         
-        // Add the `UIHostingController` view to the destination
-        // view controller.
+        // 3. Setup the view hierarchy
         addChild(controller)
         controller.view.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(controller.view)
         
-        // Set and activate the constraints for the extension's SwiftUI view.
+        // 4. Set and activate constraints to fill the view
         NSLayoutConstraint.activate([
-            controller.view.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 1),
-            controller.view.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 1),
-            controller.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            controller.view.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            controller.view.topAnchor.constraint(equalTo: view.topAnchor),
+            controller.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            controller.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            controller.view.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
         
-        // Notify the child view controller that the move is complete.
+        // 5. Notify the child view controller that the transition is complete
         controller.didMove(toParent: self)
+        
+        // Ensure the background is clear to match Wallet UI expectations
+        view.backgroundColor = .clear
+        controller.view.backgroundColor = .clear
     }
 }
