@@ -30,7 +30,7 @@
 <key>NSExtensionPointIdentifier</key>
 <string>com.apple.PassKit.issuer-provisioning</string>
 <key>NSExtensionPrincipalClass</key>
-<string>KFHWalletHandler</string>
+<string>WNonUI.KFHWalletHandler</string>
 </dict>
 </config-file>
 </extension-target>
@@ -40,7 +40,7 @@
 <key>NSExtensionPointIdentifier</key>
 <string>com.apple.PassKit.issuer-provisioning.authorization</string>
 <key>NSExtensionPrincipalClass</key>
-<string>KFHUIHandler</string>
+<string>WUI.KFHUIHandler</string>
 </dict>
 </config-file>
 </extension-target>
@@ -55,3 +55,4 @@
 </platform>
 </plugin>
  
+
