@@ -1,14 +1,17 @@
 {
- "name": "com-kfh-wallet-plugin",
- "version": "1.0.0",
- "description": "KFH Wallet Plugin with Extension Support",
- "cordova": {
-   "id": "com-kfh-wallet-plugin",
-   "platforms": [
-     "ios"
-   ]
- },
- "dependencies": {
-   "xcode": "^3.0.1"
- }
+  "name": "cordova-plugin-aub-wallet",
+  "version": "1.0.0",
+  "description": "AUB Apple Wallet Issuer Extension and In-App Provisioning Plugin",
+  "cordova": {
+    "id": "cordova-plugin-aub-wallet",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "dependencies": {
+    "xcode": "^3.0.1",
+    "fs-extra": "^10.0.0"
+  },
+  "author": "AUB Mobile Team",
+  "license": "MIT"
 }
