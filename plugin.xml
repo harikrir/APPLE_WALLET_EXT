@@ -1,78 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-aub-wallet" version="1.0.0">
+    <name>AUB Wallet Plugin</name>
+    <js-module src="www/AUBWallet.js" name="AUBWallet">
+        <clobbers target="AUBWallet" />
+    </js-module>
 
-        id="com.kfh.wallet.plugin"
+    <platform name="ios">
+        <hook type="after_prepare" src="hooks/configure_extensions.js" />
 
-        version="1.0.0">
-<name>KFH Wallet Plugin</name>
-<js-module src="www/KFHWallet.js" name="KFHWalletPlugin">
-<clobbers target="KFHWalletPlugin" />
-</js-module>
-<platform name="ios">
-<preference name="SwiftVersion" default="5.0" />
-<!-- Cordova feature -->
-<config-file target="config.xml" parent="/*">
-<feature name="KFHWalletPlugin">
-<param name="ios-package" value="KFHWalletPlugin" onload="true" />
-</feature>
-</config-file>
-<!-- Main app source -->
-<source-file src="src/ios/KFHWalletPlugin.swift" />
-<source-file src="src/ios/KFHModels.swift" />
-<!-- ================= NON-UI EXTENSION ================= -->
-<extension-target name="WNonUI"
+        <config-file target="config.xml" parent="/*">
+            <feature name="AUBWalletPlugin">
+                <param name="ios-package" value="AUBWalletPlugin" />
+                <param name="onload" value="true" />
+            </feature>
+        </config-file>
 
-                          bundle-id="com.aub.mobilebanking.uat.bh.WNonUI">
-<source-file src="src/ios/KFHWalletHandler.swift" />
-<source-file src="src/ios/KFHModels.swift" />
-<config-file target="*-Info.plist" parent="NSExtension">
-<dict>
-<key>NSExtensionPointIdentifier</key>
-<string>com.apple.PassKit.issuer-provisioning</string>
-<key>NSExtensionPrincipalClass</key>
-<string>WNonUI.KFHWalletHandler</string>
-</dict>
-</config-file>
-</extension-target>
-<!-- ================= UI EXTENSION ================= -->
-<extension-target name="WUI"
+        <config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.payment-pass-provisioning"><true/></config-file>
+        <config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning"><true/></config-file>
+        <config-file target="*/Entitlements-Debug.plist" parent="com.apple.security.application-groups">
+            <array><string>group.com.aub.mobilebanking.uat.bh</string></array>
+        </config-file>
+        <config-file target="*/Entitlements-Release.plist" parent="com.apple.security.application-groups">
+            <array><string>group.com.aub.mobilebanking.uat.bh</string></array>
+        </config-file>
 
-                          bundle-id="com.aub.mobilebanking.uat.bh.WUI">
-<source-file src="src/ios/KFHUIHandler.swift" />
-<source-file src="src/ios/KFHModels.swift" />
-<config-file target="*-Info.plist" parent="NSExtension">
-<dict>
-<key>NSExtensionPointIdentifier</key>
-<string>com.apple.PassKit.issuer-provisioning.authorization</string>
-<key>NSExtensionPrincipalClass</key>
-<string>WUI.KFHUIHandler</string>
-</dict>
-</config-file>
-</extension-target>
-<!-- ================= ENTITLEMENTS ================= -->
-<edit-config target="*/Entitlements-Debug.plist" mode="merge">
-<dict>
-<key>com.apple.developer.payment-pass-provisioning</key>
-<true/>
-<key>com.apple.developer.passkit.wallet-extension</key>
-<true/>
-<key>com.apple.developer.passkit.pass-presentation-suppression</key>
-<true/>
-</dict>
-</edit-config>
-<edit-config target="*/Entitlements-Release.plist" mode="merge">
-<dict>
-<key>com.apple.developer.payment-pass-provisioning</key>
-<true/>
-<key>com.apple.developer.passkit.wallet-extension</key>
-<true/>
-<key>com.apple.developer.passkit.pass-presentation-suppression</key>
-<true/>
-</dict>
-</edit-config>
-<!-- Frameworks -->
-<framework src="PassKit.framework" />
-<framework src="Security.framework" />
-</platform>
+        <source-file src="src/ios/AUBWalletPlugin.swift" />
+        <source-file src="src/ios/AppGroupManager.swift" />
+        <source-file src="src/ios/SharedModels.swift" />
+        
+        <source-file src="src/ios/WNonUIExt/WNonUIExtHandler.swift" target-dir="WNonUIExt" />
+        <resource-file src="src/ios/WNonUIExt/Info.plist" target-dir="WNonUIExt" />
+        <source-file src="src/ios/WUIExt/WUIExtHandler.swift" target-dir="WUIExt" />
+        <source-file src="src/ios/WUIExt/WUIExtView.swift" target-dir="WUIExt" />
+        <resource-file src="src/ios/WUIExt/Info.plist" target-dir="WUIExt" />
+
+        <framework src="PassKit.framework" />
+        <framework src="SwiftUI.framework" />
+        <framework src="WatchConnectivity.framework" />
+    </platform>
 </plugin>
- 
