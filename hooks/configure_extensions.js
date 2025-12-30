@@ -23,13 +23,13 @@ module.exports = function (context) {
                name: "WNonUIExt",
                bundleId: "com.aub.mobilebanking.uat.bh.WNonUI",
                profile: "com.aub.mobilebanking.uat.bh.WNonUI.mobileprovision",
-               uuid: "YOUR-NONUI-PROFILE-UUID-HERE" // IMPORTANT: Replace with actual UUID
+               uuid: "2458aa6f-941b-43c4-b787-b1d304a7b73c" // IMPORTANT: Replace with actual UUID
            },
            {
                name: "WUIExt",
                bundleId: "com.aub.mobilebanking.uat.bh.WUI",
                profile: "com.aub.mobilebanking.uat.bh.WUI.mobileprovision",
-               uuid: "YOUR-WUI-PROFILE-UUID-HERE" // IMPORTANT: Replace with actual UUID
+               uuid: "ef234420-f58f-41e4-871a-86527fe5acfd" // IMPORTANT: Replace with actual UUID
            }
        ]
    };
