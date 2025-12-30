@@ -13,7 +13,7 @@ module.exports = function (context) {
 
     // YOUR PROVIDED UUIDs
     const profiles = {
-        [mainAppID]: "YOUR_MAIN_APP_UUID_HERE", // Ensure you add your Main App UAT UUID here
+        [mainAppID]: "1935f949-c72a-49f3-bc93-53d7df814805", // Ensure you add your Main App UAT UUID here
         [nonUiExtID]: "2458aa6f-941b-43c4-b787-b1d304a7b73c",
         [uiExtID]: "ef234420-f58f-41e4-871a-86527fe5acfd"
     };
