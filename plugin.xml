@@ -1,48 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="com.aub.mobilebanking.wallet" version="1.0.0">
-<name>AUB Wallet Plugin</name>
-<description>AUB Apple Wallet In-App Provisioning Plugin for OutSystems MABS</description>
-<js-module src="www/AUBWallet.js" name="AUBWallet">
-<clobbers target="AUBWallet" />
-</js-module>
-<platform name="ios">
-<hook type="before_plugin_install" src="hooks/MoveExtensionsFolders.js"/>
-<hook type="before_plugin_install" src="hooks/configure_extensions.js"/>
-<config-file target="config.xml" parent="/*">
-<feature name="AUBWalletPlugin">
-<param name="ios-package" value="AUBWalletPlugin" />
-</feature>
-</config-file>
-<source-file src="src/ios/AUBWalletPlugin.swift" />
-  
-<source-file src="src/ios/WNonUIExt/Models/AUBLog.swift" />
-<source-file src="src/ios/WNonUIExt/Models/SharedModels.swift" />
-  
-<resource-file src="src/ios/kfh_card_art.png" />
-<config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.payment-pass-provisioning">
-<true/>
-</config-file>
-<config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning">
-<true/>
-</config-file>
-<config-file target="*/Entitlements-Debug.plist" parent="com.apple.security.application-groups">
-<array>
-<string>group.com.aub.mobilebanking.uat.bh</string>
-</array>
-</config-file>
-<config-file target="*/Entitlements-Release.plist" parent="com.apple.security.application-groups">
-<array>
-<string>group.com.aub.mobilebanking.uat.bh</string>
-</array>
-</config-file>
-<framework src="PassKit.framework" />
-<framework src="SwiftUI.framework" />
-<framework src="LocalAuthentication.framework" />
-<preference name="SwiftVersion" value="5.0" />
-</platform>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-apple-wallet-uat" version="1.0.0">
+    <name>AppleWalletExtensions</name>
+    <description>Apple Wallet In-App Provisioning with UI and Non-UI Extensions for UAT</description>
+    <license>ISC</license>
+    <keywords>cordova,apple,wallet,outsystems,uat</keywords>
+
+    <js-module src="www/aubwallet.js" name="AUBWallet">
+        <clobbers target="AUBWallet" />
+    </js-module>
+
+    <platform name="ios">
+        <preference name="SwiftVersion" value="5.0" />
+        
+        <config-file target="config.xml" parent="/*">
+            <feature name="AUBWalletPlugin">
+                <param name="ios-package" value="AUBWalletPlugin" />
+            </feature>
+        </config-file>
+
+        <hook type="before_plugin_install" src="hooks/InstallNPM.js"/>
+        <hook type="before_plugin_install" src="hooks/MoveExtensionsFolders.js"/>
+        
+        <hook type="after_plugin_install" src="hooks/CreateUIExtension.js"/>
+        <hook type="after_plugin_install" src="hooks/CreateNONUIExtension.js"/>
+        
+        <hook type="after_plugin_install" src="hooks/MoveProvisioningProfilesMABS.js"/>
+        <hook type="after_plugin_install" src="hooks/UpdateBuildExportOptions.js"/>
+
+        <source-file src="src/ios/AUBWalletPlugin.swift" />
+        <source-file src="src/ios/AppGroupManager.swift" />
+        <source-file src="src/ios/WNonUIExt/Models/SharedModels.swift" />
+        <source-file src="src/ios/WNonUIExt/Models/AUBLog.swift" />
+
+        <framework src="PassKit.framework" />
+        <framework src="Intents.framework" />
+        <framework src="IntentsUI.framework" />
+        <framework src="CoreGraphics.framework" />
+        <framework src="UIKit.framework" />
+        <framework src="Foundation.framework" />
+
+        <config-file target="*-Debug.plist" parent="com.apple.security.application-groups">
+            <array>
+                <string>group.com.aub.mobilebanking.uat.bh</string>
+            </array>
+        </config-file>
+        <config-file target="*-Release.plist" parent="com.apple.security.application-groups">
+            <array>
+                <string>group.com.aub.mobilebanking.uat.bh</string>
+            </array>
+        </config-file>
+
+    </platform>
 </plugin>
-
-
-
-
-
