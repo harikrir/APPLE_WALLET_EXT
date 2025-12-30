@@ -1,17 +1,36 @@
 {
-  "name": "cordova-plugin-aub-wallet",
+  "name": "com.aub.mobilebanking.wallet",
   "version": "1.0.0",
   "description": "AUB Apple Wallet Issuer Extension and In-App Provisioning Plugin",
   "cordova": {
-    "id": "cordova-plugin-aub-wallet",
+    "id": "com.aub.mobilebanking.wallet",
     "platforms": [
       "ios"
     ]
+  },
+  "engines": {
+    "cordovaDependencies": {
+      "1.0.0": {
+        "cordova": ">=10.0.0",
+        "cordova-ios": ">=6.0.0"
+      }
+    }
   },
   "dependencies": {
     "xcode": "^3.0.1",
     "fs-extra": "^10.0.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aub-mobile/cordova-plugin-aub-wallet.git"
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-ios",
+    "apple-wallet",
+    "provisioning",
+    "issuer-extension"
+  ],
   "author": "AUB Mobile Team",
   "license": "MIT"
 }
