@@ -6,7 +6,10 @@
 <clobbers target="AUBWallet" />
 </js-module>
 <platform name="ios">
-<hook type="after_prepare" src="hooks/configure_extensions.js" />
+//<hook type="after_prepare" src="hooks/configure_extensions.js" />
+  <hook type="after_plugin_install" src="hooks/MoveExtensionsFolders.js"/>
+<hook type="after_plugin_install" src="hooks/configure_extensions.js"/>
+  
 <config-file target="config.xml" parent="/*">
 <feature name="AUBWalletPlugin">
 <param name="ios-package" value="AUBWalletPlugin" />
@@ -43,3 +46,4 @@
 <preference name="SwiftVersion" value="5.0" />
 </platform>
 </plugin>
+
