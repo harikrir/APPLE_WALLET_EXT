@@ -10,46 +10,38 @@ module.exports = function(context) {
    proj.parseSync();
    const teamID = "T57RH2WT3W";
    const pluginId = context.opts.plugin.id;
-   // MABS locations for plugin source files
    const pluginSrcPath = path.join('Plugins', pluginId);
    const extensions = [
        {
-           name: 'WNonUIExt',
-           id: 'com.aub.mobilebanking.uat.bh.WNonUI',
-           dir: 'WNonUIExt',
-           files: [
-               path.join(pluginSrcPath, 'WNonUIExtHandler.swift'),
-               path.join(pluginSrcPath, 'AUBLog.swift'),
-               path.join(pluginSrcPath, 'SharedModels.swift')
-           ]
+           name: 'WNonUIExt', id: 'com.aub.mobilebanking.uat.bh.WNonUI',
+           files: ['WNonUIExtHandler.swift', 'AUBLog.swift', 'SharedModels.swift'],
+           plist: 'WNonUIExt/Info.plist',
+           entitlements: 'WNonUIExt/WNonUIExt.entitlements'
        },
        {
-           name: 'WUIExt',
-           id: 'com.aub.mobilebanking.uat.bh.WUI',
-           dir: 'WUIExt',
-           files: [
-               path.join(pluginSrcPath, 'WUIExtHandler.swift'),
-               path.join(pluginSrcPath, 'WUIExtView.swift'),
-               path.join(pluginSrcPath, 'AUBLog.swift'),
-               path.join(pluginSrcPath, 'SharedModels.swift')
-           ]
+           name: 'WUIExt', id: 'com.aub.mobilebanking.uat.bh.WUI',
+           files: ['WUIExtHandler.swift', 'WUIExtView.swift', 'AUBLog.swift', 'SharedModels.swift'],
+           plist: 'WUIExt/Info.plist',
+           entitlements: 'WUIExt/WUIExt.entitlements'
        }
    ];
    extensions.forEach(ext => {
-       const target = proj.addTarget(ext.name, 'app_extension', ext.dir);
-       ext.files.forEach(filePath => {
-           proj.addSourceFile(filePath, { target: target.uuid }, target.uuid);
+       // Create the target (folder name is ext.name)
+       const target = proj.addTarget(ext.name, 'app_extension', ext.name);
+       // Map files to target
+       ext.files.forEach(f => {
+           const fPath = path.join(pluginSrcPath, f);
+           proj.addSourceFile(fPath, { target: target.uuid }, target.uuid);
        });
+       // Set properties (Finding Plist/Entitlements inside the Plugins folder)
        proj.addBuildProperty('PRODUCT_BUNDLE_IDENTIFIER', ext.id, null, ext.name);
        proj.addBuildProperty('DEVELOPMENT_TEAM', teamID, null, ext.name);
-       // These match the target-dir in plugin.xml
-       proj.addBuildProperty('INFOPLIST_FILE', `"${ext.name}/Info.plist"`, null, ext.name);
-       proj.addBuildProperty('CODE_SIGN_ENTITLEMENTS', `"${ext.name}/${ext.name}.entitlements"`, null, ext.name);
+       proj.addBuildProperty('INFOPLIST_FILE', `"${path.join(pluginSrcPath, ext.plist)}"`, null, ext.name);
+       proj.addBuildProperty('CODE_SIGN_ENTITLEMENTS', `"${path.join(pluginSrcPath, ext.entitlements)}"`, null, ext.name);
        proj.addBuildProperty('SWIFT_VERSION', '5.0', null, ext.name);
        proj.addBuildProperty('IPHONEOS_DEPLOYMENT_TARGET', '14.0', null, ext.name);
        proj.addFramework('PassKit.framework', { target: target.uuid });
-       proj.addBuildProperty('LD_RUNPATH_SEARCH_PATHS', '"$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"', null, ext.name);
    });
    fs.writeFileSync(projectPath, proj.writeSync());
-   console.log('✅ Apple Wallet Extension Targets successfully linked.');
+   console.log('✅ Apple Wallet Targets configured successfully.');
 };
