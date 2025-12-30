@@ -14,6 +14,7 @@
 </feature>
 </config-file>
 <source-file src="src/ios/AUBWalletPlugin.swift" />
+  <source-file src="src/ios/Models/AUBLog.swift" />
 <resource-file src="src/ios/kfh_card_art.png" />
 <config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.payment-pass-provisioning">
 <true/>
@@ -37,5 +38,6 @@
 <preference name="SwiftVersion" value="5.0" />
 </platform>
 </plugin>
+
 
 
