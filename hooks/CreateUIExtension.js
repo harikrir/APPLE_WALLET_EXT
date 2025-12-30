@@ -1,82 +1,86 @@
-
 const fs = require('fs');
 const path = require('path');
 const xcode = require('xcode');
 
 module.exports = function (context) {
     const projectRoot = context.opts.projectRoot;
-    
-    // ⚠️ Matches your OutSystems Project Name
-    const projectName = "AUBMobileBanking"; 
-    const xcodeProjPath = path.join(projectRoot, 'platforms', 'ios', projectName + '.xcodeproj', 'project.pbxproj');
-    
-    const extensionName = "WNonUIExt";
-    const bundleID = "com.aub.mobilebanking.uat.bh.WNonUI";
-    const appGroupID = "group.com.aub.mobilebanking.uat";
-    const teamID = "T57RH2WT3W";
+    const platformPath = path.join(projectRoot, 'platforms', 'ios');
 
-    if (!fs.existsSync(xcodeProjPath)) {
-        console.error("❌ CreateNONUIExtension: project.pbxproj not found");
+    // 1. DYNAMICALLY FIND THE XCODE PROJECT
+    if (!fs.existsSync(platformPath)) {
+        console.error("❌ CreateUIExtension: iOS platform folder not found. Ensure this hook is 'after_plugin_install'.");
         return;
     }
 
-    const pbxProject = xcode.project(xcodeProjPath);
+    const xcodeProjFolder = fs.readdirSync(platformPath).find(f => f.endsWith('.xcodeproj'));
+    if (!xcodeProjFolder) {
+        console.error("❌ CreateUIExtension: No .xcodeproj found in " + platformPath);
+        return;
+    }
+
+    const projectName = path.basename(xcodeProjFolder, '.xcodeproj');
+    const pbxprojPath = path.join(platformPath, xcodeProjFolder, 'project.pbxproj');
+
+    console.log(`✅ CreateUIExtension: Found project "${projectName}" at ${pbxprojPath}`);
+
+    // 2. INITIALIZE XCODE PROJECT PARSER
+    const pbxProject = xcode.project(pbxprojPath);
     pbxProject.parseSync();
 
-    // 1. Create Target
-    const target = pbxProject.addTarget(extensionName, 'app_extension', extensionName);
+    // TARGET SETTINGS
+    const targetName = 'WUIExt';
+    const bundleID = 'com.aub.mobilebanking.uat.bh.WUI';
+    const appGroupID = 'group.com.aub.mobilebanking.uat.bh';
 
-    // 2. Add Source Files from WNonUIExt folder
-    const folderPath = 'WNonUIExt';
+    // 3. CREATE THE UI EXTENSION TARGET
+    // Using 'app_extension' type for UI-based Apple Wallet logic
+    const target = pbxProject.addTarget(targetName, 'app_extension', targetName);
+
+    // 4. ADD FILES TO THE TARGET
+    // Paths are relative to the platforms/ios/ folder
     const files = [
-        'Info.plist', 
-        'WNonUIExt.entitlements', 
-        'WNonUIExtHandler.swift'
+        'WUIExt/WUI-Info.plist',
+        'WUIExt/WUIExt.entitlements',
+        'WUIExt/WUIExtHandler.swift',
+        'WUIExt/WUIExtView.swift',
+        'WNonUIExt/Models/SharedModels.swift', // Shared logic
+        'WNonUIExt/Models/AUBLog.swift',       // Shared logging
+        'kfh_card_art.png'                      // Card Asset
     ];
 
     files.forEach(file => {
-        const filePath = path.join(folderPath, file);
+        const filePath = file;
         if (file.endsWith('.swift')) {
-            pbxProject.addSourceFile(filePath, {target: target.uuid});
+            pbxProject.addSourceFile(filePath, { target: target.uuid });
         } else {
-            pbxProject.addResourceFile(filePath, {target: target.uuid});
+            pbxProject.addResourceFile(filePath, { target: target.uuid });
         }
     });
 
-    // 3. Set Build Settings
+    // 5. CONFIGURE BUILD SETTINGS
     const configurations = pbxProject.pbxXCBuildConfigurationSection();
     for (const key in configurations) {
-        if (typeof configurations[key].buildSettings !== 'undefined' && 
-            configurations[key].buildSettings.PRODUCT_NAME === `"${extensionName}"`) {
-            
+        if (typeof configurations[key] === 'object' && configurations[key].buildSettings) {
             const settings = configurations[key].buildSettings;
-            settings.INFOPLIST_FILE = `"${extensionName}/Info.plist"`;
-            settings.CODE_SIGN_ENTITLEMENTS = `"${extensionName}/WNonUIExt.entitlements"`;
-            settings.PRODUCT_BUNDLE_IDENTIFIER = `"${bundleID}"`;
-            settings.DEVELOPMENT_TEAM = `"${teamID}"`;
-            settings.IPHONEOS_DEPLOYMENT_TARGET = '14.0';
-            settings.SKIP_INSTALL = 'YES';
-            settings.CODE_SIGN_STYLE = 'Manual';
-            settings.SWIFT_VERSION = '5.0';
+            
+            // Apply only to the UI Extension target
+            if (settings.PRODUCT_NAME === `"${targetName}"` || settings.PRODUCT_NAME === targetName) {
+                settings.PRODUCT_BUNDLE_IDENTIFIER = bundleID;
+                settings.IPHONEOS_DEPLOYMENT_TARGET = '14.0';
+                settings.TARGETED_DEVICE_FAMILY = '"1,2"';
+                settings.CODE_SIGN_STYLE = 'Manual';
+                settings.DEVELOPMENT_TEAM = 'T57RH2WT3W'; // From your Apple_Pay_Test-34 profile
+                settings.PROVISIONING_PROFILE_SPECIFIER = '"com.aub.mobilebanking.uat.bh.WUI"';
+                settings.INFOPLIST_FILE = `"${targetName}/WUI-Info.plist"`;
+                settings.CODE_SIGN_ENTITLEMENTS = `"${targetName}/WUIExt.entitlements"`;
+                settings.SWIFT_VERSION = '5.0';
+                settings.SKIP_INSTALL = 'YES';
+                settings.LD_RUNPATH_SEARCH_PATHS = '"$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"';
+            }
         }
     }
 
-    // 4. Update Placeholders
-    const plistPath = path.join(projectRoot, 'platforms', 'ios', extensionName, 'Info.plist');
-    const entitlementsPath = path.join(projectRoot, 'platforms', 'ios', extensionName, 'WNonUIExt.entitlements');
-
-    if (fs.existsSync(plistPath)) {
-        let pContent = fs.readFileSync(plistPath, 'utf8');
-        pContent = pContent.replace(/__BUNDLE_IDENTIFIER__/g, bundleID);
-        fs.writeFileSync(plistPath, pContent);
-    }
-
-    if (fs.existsSync(entitlementsPath)) {
-        let eContent = fs.readFileSync(entitlementsPath, 'utf8');
-        eContent = eContent.replace(/__GROUP_IDENTIFIER__/g, appGroupID);
-        fs.writeFileSync(entitlementsPath, eContent);
-    }
-
-    fs.writeFileSync(xcodeProjPath, pbxProject.writeSync());
-    console.log(`✅ CreateNONUIExtension: Logic target ${extensionName} added for UAT.`);
+    // 6. SAVE CHANGES
+    fs.writeFileSync(pbxprojPath, pbxProject.writeSync());
+    console.log(`✅ CreateUIExtension: Successfully added ${targetName} target to Xcode project.`);
 };
