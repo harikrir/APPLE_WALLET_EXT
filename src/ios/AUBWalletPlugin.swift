@@ -17,8 +17,9 @@ class AUBWalletPlugin: CDVPlugin, PKAddPaymentPassViewControllerDelegate {
        AUBLog.plugin.info("Setting Auth Token for provisioning.")
        UserDefaults(suiteName: groupID)?.set(token, forKey: "AUB_Auth_Token")
        UserDefaults(suiteName: groupID)?.synchronize()
-       // FIX: Changed .OK to .CDVCommandStatus_OK
-       self.commandDelegate.send(CDVPluginResult(status: .CDVCommandStatus_OK), callbackId: command.callbackId)
+       // FIXED: Using lowercase .ok as required by modern Swift-Cordova bridge
+       let result = CDVPluginResult(status: .ok)
+       self.commandDelegate.send(result, callbackId: command.callbackId)
    }
    @objc(startProvisioning:)
    func startProvisioning(command: CDVInvokedUrlCommand) {
@@ -37,7 +38,7 @@ class AUBWalletPlugin: CDVPlugin, PKAddPaymentPassViewControllerDelegate {
            return
        }
        // 2. Setup Configuration
-       guard let config = PKAddPaymentPassViewController.canAddPaymentPass() ? PKAddPaymentPassRequestConfiguration(encryptionScheme: .ECC_V2) : nil else {
+       guard let config = PKAddPaymentPassRequestConfiguration(encryptionScheme: .ECC_V2) else {
            AUBLog.plugin.error("Encryption Scheme ECC_V2 initialization failed.")
            self.sendError("Initialization Error")
            return
@@ -81,7 +82,6 @@ class AUBWalletPlugin: CDVPlugin, PKAddPaymentPassViewControllerDelegate {
        URLSession.shared.dataTask(with: request) { data, response, error in
            if let error = error {
                AUBLog.plugin.error("Handshake Network Error: \(error.localizedDescription)")
-               // Note: In a real app, you'd want to call completionHandler with an empty request to fail gracefully
                return
            }
            guard let data = data else {
@@ -108,16 +108,16 @@ class AUBWalletPlugin: CDVPlugin, PKAddPaymentPassViewControllerDelegate {
                self.sendError(error.localizedDescription)
            } else {
                AUBLog.plugin.notice("Card successfully added to Apple Wallet.")
-               // FIX: Changed .OK to .CDVCommandStatus_OK
-               let result = CDVPluginResult(status: .CDVCommandStatus_OK)
+               // FIXED: Using lowercase .ok
+               let result = CDVPluginResult(status: .ok)
                self.commandDelegate.send(result, callbackId: self.currentCallbackId)
            }
        }
    }
    // MARK: - Helpers
    private func sendError(_ message: String) {
-       // FIX: Changed .ERROR to .CDVCommandStatus_ERROR
-       let result = CDVPluginResult(status: .CDVCommandStatus_ERROR, messageAs: message)
+       // FIXED: Using lowercase .error
+       let result = CDVPluginResult(status: .error, messageAs: message)
        self.commandDelegate.send(result, callbackId: self.currentCallbackId)
    }
 }
