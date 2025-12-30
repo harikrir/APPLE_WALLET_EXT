@@ -17,35 +17,41 @@ class WNonUIExtHandler: PKIssuerProvisioningExtensionHandler {
        completion(status)
    }
    // 2. Returns the card details (metadata and art) to display in the Wallet suggest list
-   override func passEntries(completion: @escaping ([PKIssuerProvisioningExtensionPassEntry]) -> Void) {
-       logger.info("Fetching pass entries for Wallet.")
-       guard let cardId = UserDefaults(suiteName: groupID)?.string(forKey: "ACTIVE_CARD_ID") else {
-           logger.warning("No card found in shared storage. Returning empty list.")
-           completion([])
-           return
-       }
-       // Setup the card configuration
-       guard let config = PKAddPaymentPassRequestConfiguration(encryptionScheme: .ECC_V2) else {
-           logger.error("Failed to create PKAddPaymentPassRequestConfiguration")
-           completion([])
-           return
-       }
-       config.primaryAccountSuffix = String(cardId.suffix(4))
-       config.localizedDescription = "AUB Payment Card"
-       // Load card art from the bundle
-       // Note: Ensure kfh_card_art is added as a resource to the WNonUIExt target in your hook
-       guard let image = UIImage(named: "kfh_card_art"), let cardImage = image.cgImage else {
-           logger.error("Critical Error: 'kfh_card_art' image not found in extension bundle.")
-           completion([])
-           return
-       }
-       // UPDATED: Correct initializer for PKIssuerProvisioningExtensionPassEntry
-       let entry = PKIssuerProvisioningExtensionPassEntry(
-           identifier: cardId,
-           title: "AUB Visa Card",
-           art: cardImage
-       )
-       logger.notice("Successfully sent pass entry for suffix \(cardId.suffix(4))")
-       completion([entry])
+override func passEntries(completion: @escaping ([PKIssuerProvisioningExtensionPassEntry]) -> Void) {
+   logger.info("Fetching pass entries for Wallet.")
+   guard let cardId = UserDefaults(suiteName: groupID)?.string(forKey: "ACTIVE_CARD_ID") else {
+       logger.warning("No card found in shared storage. Returning empty list.")
+       completion([])
+       return
    }
+   // 1. Setup the card configuration
+   guard let config = PKAddPaymentPassRequestConfiguration(encryptionScheme: .ECC_V2) else {
+       logger.error("Failed to create PKAddPaymentPassRequestConfiguration")
+       completion([])
+       return
+   }
+   config.primaryAccountSuffix = String(cardId.suffix(4))
+   config.localizedDescription = "AUB Payment Card"
+   // 2. Load card art and ensure it is a CGImage
+   guard let image = UIImage(named: "kfh_card_art"),
+         let cardImage = image.cgImage else {
+       logger.error("Critical Error: 'kfh_card_art' image not found or invalid.")
+       completion([])
+       return
+   }
+   // 3. FIX: Use PKIssuerProvisioningExtensionPaymentPassEntry (the Subclass)
+   // This subclass is the one that accepts the addRequestConfiguration argument.
+   if let entry = PKIssuerProvisioningExtensionPaymentPassEntry(
+       identifier: cardId,
+       title: "AUB Visa Card",
+       art: cardImage,
+       addRequestConfiguration: config
+   ) {
+       logger.notice("Successfully created pass entry for suffix \(cardId.suffix(4))")
+       completion([entry])
+   } else {
+       logger.error("Failed to initialize PKIssuerProvisioningExtensionPaymentPassEntry")
+       completion([])
+   }
+}
 }
