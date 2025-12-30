@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="com.aub.mobilebanking.wallet" version="1.0.0">
 <name>AUB Wallet Plugin</name>
+<description>AUB Apple Wallet In-App Provisioning Plugin for OutSystems MABS</description>
 <js-module src="www/AUBWallet.js" name="AUBWallet">
 <clobbers target="AUBWallet" />
 </js-module>
@@ -18,22 +19,27 @@
 <source-file src="src/ios/WUIExt/WUIExtView.swift" />
 <source-file src="src/ios/WNonUIExt/Models/AUBLog.swift" />
 <source-file src="src/ios/WNonUIExt/Models/SharedModels.swift" />
-<source-file src="src/ios/WNonUIExt/Info.plist" />
+<source-file src="src/ios/WNonUIExt/WNonUI-Info.plist" />
 <source-file src="src/ios/WNonUIExt/WNonUIExt.entitlements" />
-<source-file src="src/ios/WUIExt/Info.plist" />
+<source-file src="src/ios/WUIExt/WUI-Info.plist" />
 <source-file src="src/ios/WUIExt/WUIExt.entitlements" />
 <resource-file src="src/ios/profiles/com.aub.mobilebanking.uat.bh.WNonUI.mobileprovision" />
 <resource-file src="src/ios/profiles/com.aub.mobilebanking.uat.bh.WUI.mobileprovision" />
 <config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.payment-pass-provisioning"><true/></config-file>
 <config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning"><true/></config-file>
 <config-file target="*/Entitlements-Debug.plist" parent="com.apple.security.application-groups">
-<array><string>group.com.aub.mobilebanking.uat.bh</string></array>
+<array>
+<string>group.com.aub.mobilebanking.uat.bh</string>
+</array>
 </config-file>
 <config-file target="*/Entitlements-Release.plist" parent="com.apple.security.application-groups">
-<array><string>group.com.aub.mobilebanking.uat.bh</string></array>
+<array>
+<string>group.com.aub.mobilebanking.uat.bh</string>
+</array>
 </config-file>
 <framework src="PassKit.framework" />
 <framework src="SwiftUI.framework" />
+<framework src="LocalAuthentication.framework" />
 <preference name="SwiftVersion" value="5.0" />
 </platform>
 </plugin>
