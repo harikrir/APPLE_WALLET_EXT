@@ -3,7 +3,7 @@ var exec = require('child_process').exec;
 var path = require('path');
 
 module.exports = function (context) {
-    var Q = context.requireCordovaModule('q');
+    var Q = context. require('q');
     var deferral = new Q.defer();
 
     // Determine the path to the hooks folder where package.json lives
