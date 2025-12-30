@@ -1,1 +1,15 @@
 
+{
+  "name": "apple-wallet-uat-hooks",
+  "version": "1.0.0",
+  "description": "Node dependencies for Apple Wallet Extension hooks in UAT",
+  "main": "InstallNPM.js",
+  "dependencies": {
+    "xcode": "^3.0.1",
+    "plist": "^3.0.1",
+    "q": "^1.5.1",
+    "shelljs": "^0.8.5"
+  },
+  "author": "Gemini",
+  "license": "ISC"
+}
