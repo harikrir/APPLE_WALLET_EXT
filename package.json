@@ -1,3 +1,8 @@
+
+
+
+
+
 {
   "name": "com.aub.mobilebanking.wallet",
   "version": "1.0.0",
@@ -33,4 +38,53 @@
   ],
   "author": "AUB Mobile Team",
   "license": "MIT"
+}
+
+
+
+
+
+{
+    "plugin": {
+        "resource": "AUBWalletPlugin.zip"
+    },
+    "preferences": {
+        "ios": [
+            {
+                "name": "deployment-target",
+                "value": "14.0"
+            },
+            {
+                "name": "SwiftVersion",
+                "value": "5.0"
+            }
+        ]
+    },
+    "ios": {
+        "provisioningProfiles": {
+            "com.aub.mobilebanking.uat.bh.WNonUI": "com.aub.mobilebanking.uat.bh.WNonUI.mobileprovision",
+            "com.aub.mobilebanking.uat.bh.WUI": "com.aub.mobilebanking.uat.bh.WUI.mobileprovision"
+        }
+    }
+}
+
+
+if (typeof AUBWallet !== 'undefined') {
+    AUBWallet.setAuthToken($parameters.Token, function() {
+        console.log("Auth Token set successfully");
+    }, function(err) {
+        console.error("Error setting token: " + err);
+    });
+}
+
+if (typeof AUBWallet !== 'undefined') {
+    AUBWallet.startProvisioning($parameters.CardId, $parameters.CardName, 
+    function() {
+        $actions.Resolve(true, ""); // Return success to OutSystems
+    }, 
+    function(err) {
+        $actions.Resolve(false, err); // Return error message
+    });
+} else {
+    $actions.Resolve(false, "Plugin not available");
 }
