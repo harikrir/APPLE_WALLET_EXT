@@ -33,21 +33,31 @@ module.exports = function(context) {
            profile: 'com.aub.mobilebanking.uat.bh.WUI.mobileprovision'
        }
    ];
-   // 1. Create the Embed Phase manually
-   const embedPhaseName = 'Embed App Extensions';
-   proj.addBuildPhase([], 'PBXCopyFilesBuildPhase', embedPhaseName, mainTargetKey, 'app_extension');
-   // 2. Set the destination to PlugIns (Code 13)
-   const copyPhases = proj.hash.project.objects['PBXCopyFilesBuildPhase'];
-   let embedPhaseUuid;
-   for (const key in copyPhases) {
-       if (copyPhases[key].name === `"${embedPhaseName}"`) {
-           copyPhases[key].dstSubfolderSpec = 13;
-           copyPhases[key].dstPath = "";
-           embedPhaseUuid = key;
-       }
+   // 1. Manually create the Copy Files Build Phase
+   const embedPhaseUuid = proj.generateUuid();
+   const embedPhase = {
+       isa: 'PBXCopyFilesBuildPhase',
+       buildActionMask: 2147483647,
+       dstSubfolderSpec: 13, // CRITICAL: This forces the creation of the "PlugIns" folder
+       dstPath: '""',
+       name: '"Embed App Extensions"',
+       files: [],
+       runOnlyForDeploymentPostprocessing: 0
+   };
+   // Add the phase to the project objects
+   proj.hash.project.objects['PBXCopyFilesBuildPhase'][embedPhaseUuid] = embedPhase;
+   proj.hash.project.objects['PBXCopyFilesBuildPhase'][embedPhaseUuid + '_comment'] = 'Embed App Extensions';
+   // Link the phase to the Main App Target
+   const nativeTargets = proj.hash.project.objects['PBXNativeTarget'];
+   if (nativeTargets[mainTargetKey]) {
+       nativeTargets[mainTargetKey].buildPhases.push({
+           value: embedPhaseUuid,
+           comment: 'Embed App Extensions'
+       });
    }
    extensions.forEach(ext => {
-       console.log(`🚀 Processing Extension: ${ext.name}`);
+       console.log(`🚀 Forcing Embedding for: ${ext.name}`);
+       // 2. Create the Extension Target
        const target = proj.addTarget(ext.name, 'app_extension', ext.name);
        // 3. Add Source Files
        ext.files.forEach(fileName => {
@@ -69,11 +79,11 @@ module.exports = function(context) {
                s['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0';
            }
        }
-       // 5. MANUALLY add .appex file reference to avoid 'null' error
+       // 5. MANUALLY Inject the .appex into the Build Phase to avoid "null" errors
        const appexName = `${ext.name}.appex`;
        const fileRefUuid = proj.generateUuid();
-       const fileProxyUuid = proj.generateUuid();
-       // Add file to PBXFileReference section
+       const buildFileUuid = proj.generateUuid();
+       // Add PBXFileReference
        proj.hash.project.objects['PBXFileReference'][fileRefUuid] = {
            isa: 'PBXFileReference',
            explicitFileType: '"wrapper.app-extension"',
@@ -81,29 +91,30 @@ module.exports = function(context) {
            path: `"${appexName}"`,
            sourceTree: 'BUILT_PRODUCTS_DIR'
        };
-       // Add file to the Embed Build Phase
-       const buildFileUuid = proj.generateUuid();
+       // Add PBXBuildFile
        proj.hash.project.objects['PBXBuildFile'][buildFileUuid] = {
            isa: 'PBXBuildFile',
            fileRef: fileRefUuid,
-           settings: { ATTRIBUTES: ['CodeSignOnCopy'] }
+           settings: { ATTRIBUTES: ['CodeSignOnCopy'] } // Necessary for re-signing in the PlugIns folder
        };
-       // Push to the phase's files array
-       copyPhases[embedPhaseUuid].files.push({
+       // Add to our manually created phase
+       embedPhase.files.push({
            value: buildFileUuid,
-           comment: `${appexName} in ${embedPhaseName}`
+           comment: `${appexName} in Embed App Extensions`
        });
-       // 6. Profile Copying Logic
+       // 6. Profile Handling: Rename and Copy to the correct build location
        const srcProfile = path.join(profilesSrcPath, ext.profile);
        const destFolder = path.join(platformPath, ext.name);
        if (fs.existsSync(srcProfile)) {
            if (!fs.existsSync(destFolder)) fs.mkdirSync(destFolder, { recursive: true });
            const destProfile = path.join(destFolder, 'embedded.mobileprovision');
            fs.copyFileSync(srcProfile, destProfile);
-           console.log(`✅ Embedded profile: ${ext.name}`);
+           console.log(`✅ Renamed and Copied profile for ${ext.name}`);
+       } else {
+           console.error(`❌ PROFILE NOT FOUND: ${srcProfile}`);
        }
        proj.addFramework('PassKit.framework', { target: target.uuid });
    });
    fs.writeFileSync(projectPath, proj.writeSync());
-   console.log('✅ Extension targets and PlugIns folder configured successfully.');
+   console.log('✅ Success: PlugIns folder and profiles are now forced into the IPA bundle.');
 };
