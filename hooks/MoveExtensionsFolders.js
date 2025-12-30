@@ -9,12 +9,11 @@ module.exports = function(context) {
        const source = path.join(projectRoot, 'plugins', pluginID, 'src', 'ios', extName);
        const destination = path.join(iosPath, extName);
        if (fs.existsSync(source)) {
-           // recursive: true is tight - it handles the /Models/ folder automatically
            if (!fs.existsSync(destination)) {
                fs.mkdirSync(destination, { recursive: true });
            }
            copyFolderRecursiveSync(source, destination);
-           console.log(`✅ Hook: Moved ${extName} (including subfolders) to platforms/ios`);
+           console.log(`✅ Hook: Moved ${extName} to platforms/ios`);
        }
    });
    function copyFolderRecursiveSync(source, target) {
