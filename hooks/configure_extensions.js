@@ -11,15 +11,10 @@ module.exports = function (context) {
    const pbxprojPath = path.join(iosPath, xcodeProj, 'project.pbxproj');
    const proj = xcode.project(pbxprojPath);
    proj.parseSync();
-   // 1. FIND MAIN TARGET
    const nativeTargetSection = proj.hash.project.objects['PBXNativeTarget'];
    const mainTargetKey = Object.keys(nativeTargetSection).find(key => {
        return nativeTargetSection[key].productType === '"com.apple.product-type.application"';
    });
-   if (!mainTargetKey) {
-       deferral.reject("❌ Could not find Main Application Target");
-       return deferral.promise;
-   }
    const settings = {
        teamID: "T57RH2WT3W",
        appGroup: "group.com.aub.mobilebanking.uat.bh",
@@ -28,12 +23,10 @@ module.exports = function (context) {
            { name: "WUIExt", bundleId: "com.aub.mobilebanking.uat.bh.WUI", profile: "com.aub.mobilebanking.uat.bh.WUI.mobileprovision" }
        ]
    };
-   // 2. SETUP EMBED PHASE WITH CLEANING (Prevents "Duplicate Tasks" Error)
-   if (!proj.hash.project.objects['PBXCopyFilesBuildPhase']) {
-       proj.hash.project.objects['PBXCopyFilesBuildPhase'] = {};
-   }
-   let embedPhaseKey = Object.keys(proj.hash.project.objects['PBXCopyFilesBuildPhase']).find(key => {
-       return proj.hash.project.objects['PBXCopyFilesBuildPhase'][key].name === '"Embed App Extensions"';
+   // === 1. FIND OR CREATE EMBED PHASE ===
+   if (!proj.hash.project.objects['PBXCopyFilesBuildPhase']) proj.hash.project.objects['PBXCopyFilesBuildPhase'] = {};
+   let embedPhaseKey = Object.keys(proj.hash.project.objects['PBXCopyFilesBuildPhase']).find(k => {
+       return proj.hash.project.objects['PBXCopyFilesBuildPhase'][k].name === '"Embed App Extensions"';
    });
    if (!embedPhaseKey) {
        embedPhaseKey = proj.generateUuid();
@@ -47,26 +40,26 @@ module.exports = function (context) {
            runOnlyForDeploymentPostprocessing: 0
        };
        nativeTargetSection[mainTargetKey].buildPhases.push({ value: embedPhaseKey, comment: 'Embed App Extensions' });
-   } else {
-       // CLEANUP: Remove any existing entries for our extensions to avoid duplicates
-       const phase = proj.hash.project.objects['PBXCopyFilesBuildPhase'][embedPhaseKey];
-       phase.files = phase.files.filter(fileObj => {
-           return !fileObj.comment.includes('WUIExt') && !fileObj.comment.includes('WNonUIExt');
-       });
    }
-   // 3. ADD EXTENSION TARGETS
-   settings.extensions.forEach(ext => {
-       // Add Target (or get existing)
-       const target = proj.addTarget(ext.name, 'app_extension', ext.name);
-       // Ensure Target Dependency is unique
-       const deps = nativeTargetSection[mainTargetKey].dependencies || [];
-       const depExists = deps.some(d => proj.hash.project.objects['PBXTargetDependency'][d.value] &&
-                                        proj.hash.project.objects['PBXTargetDependency'][d.value].target === target.uuid);
-       if(!depExists) {
-           proj.addTargetDependency(mainTargetKey, [target.uuid]);
+   // === 2. DEDUPLICATION: CLEAN EXISTING ENTRIES ===
+   // This removes existing .appex references from the PBXBuildFile section
+   const buildFiles = proj.hash.project.objects['PBXBuildFile'];
+   Object.keys(buildFiles).forEach(key => {
+       if (buildFiles[key].comment && (buildFiles[key].comment.includes('WUIExt.appex') || buildFiles[key].comment.includes('WNonUIExt.appex'))) {
+           delete buildFiles[key];
        }
+   });
+   // This clears the files array in the Embed Phase
+   const phase = proj.hash.project.objects['PBXCopyFilesBuildPhase'][embedPhaseKey];
+   phase.files = phase.files.filter(f => !f.comment.includes('WUIExt') && !f.comment.includes('WNonUIExt'));
+   // === 3. ADD EXTENSIONS ===
+   settings.extensions.forEach(ext => {
+       const target = proj.addTarget(ext.name, 'app_extension', ext.name);
+       // Ensure Dependency is only added once
+       const deps = nativeTargetSection[mainTargetKey].dependencies || [];
+       const hasDep = deps.some(d => proj.hash.project.objects['PBXTargetDependency'][d.value] && proj.hash.project.objects['PBXTargetDependency'][d.value].target === target.uuid);
+       if (!hasDep) proj.addTargetDependency(mainTargetKey, [target.uuid]);
        const extPath = path.join(iosPath, ext.name);
-       // Recursive adding for Models/AUBLog.swift etc.
        function addFilesRecursively(dir) {
            fs.readdirSync(dir).forEach(file => {
                const fullPath = path.join(dir, file);
@@ -80,7 +73,7 @@ module.exports = function (context) {
            });
        }
        if (fs.existsSync(extPath)) addFilesRecursively(extPath);
-       // Add .appex to Embed Phase
+       // Add to Embed Phase (Fresh Entry)
        const appexName = `${ext.name}.appex`;
        const fileRef = proj.generateUuid();
        const buildFile = proj.generateUuid();
@@ -95,32 +88,24 @@ module.exports = function (context) {
            fileRef: fileRef,
            settings: { ATTRIBUTES: ['CodeSignOnCopy'] }
        };
-       proj.hash.project.objects['PBXCopyFilesBuildPhase'][embedPhaseKey].files.push({
-           value: buildFile,
-           comment: appexName
-       });
-       // Update Build Settings
+       phase.files.push({ value: buildFile, comment: appexName });
+       // Build Settings
        const configs = proj.pbxXCBuildConfigurationSection();
        Object.keys(configs).forEach(key => {
            const cfg = configs[key];
            if (cfg.buildSettings && cfg.buildSettings.PRODUCT_NAME === `"${ext.name}"`) {
                cfg.buildSettings.PRODUCT_BUNDLE_IDENTIFIER = ext.bundleId;
                cfg.buildSettings.DEVELOPMENT_TEAM = settings.teamID;
-               cfg.buildSettings.SKIP_INSTALL = 'YES';
                cfg.buildSettings['WRAPPER_EXTENSION'] = 'appex';
+               cfg.buildSettings['SKIP_INSTALL'] = 'YES';
                cfg.buildSettings['CODE_SIGN_ENTITLEMENTS'] = `"${ext.name}/${ext.name}.entitlements"`;
                cfg.buildSettings['INFOPLIST_FILE'] = `"${ext.name}/${ext.name}-Info.plist"`;
                cfg.buildSettings['SWIFT_VERSION'] = '5.0';
            }
        });
-       // Provisioning Profile copy
-       const profSrc = path.join(projectRoot, 'plugins', pluginID, 'src', 'ios', 'profiles', ext.profile);
-       if (fs.existsSync(profSrc)) {
-           fs.copyFileSync(profSrc, path.join(extPath, 'embedded.mobileprovision'));
-       }
    });
    fs.writeFileSync(pbxprojPath, proj.writeSync());
-   console.log('🎉 Project configured successfully without duplicates.');
+   console.log('✅ Success: Project cleaned and extensions added without duplicates.');
    deferral.resolve();
    return deferral.promise;
 };
