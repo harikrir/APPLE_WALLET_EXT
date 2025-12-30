@@ -6,10 +6,8 @@
 <clobbers target="AUBWallet" />
 </js-module>
 <platform name="ios">
-
-  <hook type="after_plugin_install" src="hooks/MoveExtensionsFolders.js"/>
+<hook type="after_plugin_install" src="hooks/MoveExtensionsFolders.js"/>
 <hook type="after_prepare" src="hooks/configure_extensions.js"/>
-  
 <config-file target="config.xml" parent="/*">
 <feature name="AUBWalletPlugin">
 <param name="ios-package" value="AUBWalletPlugin" />
@@ -17,19 +15,12 @@
 </config-file>
 <source-file src="src/ios/AUBWalletPlugin.swift" />
 <resource-file src="src/ios/kfh_card_art.png" />
-<source-file src="src/ios/WNonUIExt/WNonUIExtHandler.swift" />
-<source-file src="src/ios/WUIExt/WUIExtHandler.swift" />
-<source-file src="src/ios/WUIExt/WUIExtView.swift" />
-<source-file src="src/ios/WNonUIExt/Models/AUBLog.swift" />
-<source-file src="src/ios/WNonUIExt/Models/SharedModels.swift" />
-<source-file src="src/ios/WNonUIExt/WNonUI-Info.plist" />
-<source-file src="src/ios/WNonUIExt/WNonUIExt.entitlements" />
-<source-file src="src/ios/WUIExt/WUI-Info.plist" />
-<source-file src="src/ios/WUIExt/WUIExt.entitlements" />
-<resource-file src="src/ios/profiles/com.aub.mobilebanking.uat.bh.WNonUI.mobileprovision" />
-<resource-file src="src/ios/profiles/com.aub.mobilebanking.uat.bh.WUI.mobileprovision" />
-<config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.payment-pass-provisioning"><true/></config-file>
-<config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning"><true/></config-file>
+<config-file target="*/Entitlements-Debug.plist" parent="com.apple.developer.payment-pass-provisioning">
+<true/>
+</config-file>
+<config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning">
+<true/>
+</config-file>
 <config-file target="*/Entitlements-Debug.plist" parent="com.apple.security.application-groups">
 <array>
 <string>group.com.aub.mobilebanking.uat.bh</string>
@@ -46,4 +37,3 @@
 <preference name="SwiftVersion" value="5.0" />
 </platform>
 </plugin>
-
