@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="com.aub.mobilebanking.wallet" version="1.0.0">
     <name>AUB Wallet Plugin</name>
+    <description>AUB Apple Wallet In-App Provisioning and Issuer Extension Plugin</description>
+    
     <js-module src="www/AUBWallet.js" name="AUBWallet">
         <clobbers target="AUBWallet" />
     </js-module>
@@ -17,12 +19,11 @@
         <source-file src="src/ios/AUBWalletPlugin.swift" />
         <resource-file src="src/ios/kfh_card_art.png" />
 
-        <source-file src="src/ios/WNonUIExt/Models/AUBLog.swift" />
-        <source-file src="src/ios/WNonUIExt/Models/SharedModels.swift" />
-
         <source-file src="src/ios/WNonUIExt/WNonUIExtHandler.swift" />
         <source-file src="src/ios/WUIExt/WUIExtHandler.swift" />
         <source-file src="src/ios/WUIExt/WUIExtView.swift" />
+        <source-file src="src/ios/WNonUIExt/Models/AUBLog.swift" />
+        <source-file src="src/ios/WNonUIExt/Models/SharedModels.swift" />
 
         <resource-file src="src/ios/WNonUIExt/Info.plist" target-dir="WNonUIExt" />
         <resource-file src="src/ios/WNonUIExt/WNonUIExt.entitlements" target-dir="WNonUIExt" />
@@ -38,6 +39,7 @@
         <config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.payment-pass-provisioning">
             <true/>
         </config-file>
+        
         <config-file target="*/Entitlements-Debug.plist" parent="com.apple.security.application-groups">
             <array>
                 <string>group.com.aub.mobilebanking.uat.bh</string>
@@ -52,5 +54,7 @@
         <framework src="PassKit.framework" />
         <framework src="SwiftUI.framework" />
         <framework src="LocalAuthentication.framework" />
+        
+        <preference name="SwiftVersion" value="5.0" />
     </platform>
 </plugin>
