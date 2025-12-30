@@ -15,59 +15,50 @@ module.exports = function (context) {
    const mainTargetKey = Object.keys(nativeTargetSection).find(key => {
        return nativeTargetSection[key].productType === '"com.apple.product-type.application"';
    });
-   if (!mainTargetKey) {
-       deferral.reject("Could not find Main Application Target");
-       return deferral.promise;
-   }
    const settings = {
        teamID: "T57RH2WT3W",
-       appGroup: "group.com.aub.mobilebanking",
+       appGroup: "group.com.aub.mobilebanking.uat.bh",
        extensions: [
            { name: "WNonUIExt", bundleId: "com.aub.mobilebanking.uat.bh.WNonUI", profile: "com.aub.mobilebanking.uat.bh.WNonUI.mobileprovision" },
            { name: "WUIExt", bundleId: "com.aub.mobilebanking.uat.bh.WUI", profile: "com.aub.mobilebanking.uat.bh.WUI.mobileprovision" }
        ]
    };
-   // 1. Ensure the Embed Phase exists with code 13 (PlugIns)
-   if (!proj.hash.project.objects['PBXCopyFilesBuildPhase']) {
-       proj.hash.project.objects['PBXCopyFilesBuildPhase'] = {};
-   }
-   let embedPhaseKey = Object.keys(proj.hash.project.objects['PBXCopyFilesBuildPhase']).find(key => {
-       return proj.hash.project.objects['PBXCopyFilesBuildPhase'][key].name === '"Embed App Extensions"';
-   });
+   // Prepare Embed Phase
+   if (!proj.hash.project.objects['PBXCopyFilesBuildPhase']) proj.hash.project.objects['PBXCopyFilesBuildPhase'] = {};
+   let embedPhaseKey = Object.keys(proj.hash.project.objects['PBXCopyFilesBuildPhase']).find(k => proj.hash.project.objects['PBXCopyFilesBuildPhase'][k].name === '"Embed App Extensions"');
    if (!embedPhaseKey) {
        embedPhaseKey = proj.generateUuid();
-       proj.hash.project.objects['PBXCopyFilesBuildPhase'][embedPhaseKey] = {
-           isa: 'PBXCopyFilesBuildPhase',
-           buildActionMask: 2147483647,
-           dstSubfolderSpec: 13, // This forces the "PlugIns" folder creation
-           dstPath: '""',
-           name: '"Embed App Extensions"',
-           files: [],
-           runOnlyForDeploymentPostprocessing: 0
-       };
+       proj.hash.project.objects['PBXCopyFilesBuildPhase'][embedPhaseKey] = { isa: 'PBXCopyFilesBuildPhase', buildActionMask: 2147483647, dstSubfolderSpec: 13, dstPath: '""', name: '"Embed App Extensions"', files: [], runOnlyForDeploymentPostprocessing: 0 };
        nativeTargetSection[mainTargetKey].buildPhases.push({ value: embedPhaseKey, comment: 'Embed App Extensions' });
    }
    settings.extensions.forEach(ext => {
        const target = proj.addTarget(ext.name, 'app_extension', ext.name);
-       // CRITICAL: Forces the main app to build this extension FIRST
        proj.addTargetDependency(mainTargetKey, [target.uuid]);
-       // Add the .appex to the Embed Phase
+       const extPath = path.join(iosPath, ext.name);
+       // --- TIGHT RECURSIVE ADDING (Handles Models/AUBLog.swift etc) ---
+       function addFilesRecursively(dir) {
+           fs.readdirSync(dir).forEach(file => {
+               const fullPath = path.join(dir, file);
+               const relPath = path.relative(iosPath, fullPath);
+               if (fs.statSync(fullPath).isDirectory()) {
+                   addFilesRecursively(fullPath);
+               } else {
+                   if (file.endsWith('.swift')) {
+                       proj.addSourceFile(relPath, { target: target.uuid });
+                   } else if (file.endsWith('.plist') || file.endsWith('.entitlements')) {
+                       proj.addResourceFile(relPath, { target: target.uuid });
+                   }
+               }
+           });
+       }
+       if (fs.existsSync(extPath)) addFilesRecursively(extPath);
+       // Link .appex
        const appexName = `${ext.name}.appex`;
-       const fileRef = proj.generateUuid();
-       const buildFile = proj.generateUuid();
-       proj.hash.project.objects['PBXFileReference'][fileRef] = {
-           isa: 'PBXFileReference',
-           explicitFileType: '"wrapper.app-extension"',
-           path: `"${appexName}"`,
-           sourceTree: 'BUILT_PRODUCTS_DIR'
-       };
-       proj.hash.project.objects['PBXBuildFile'][buildFile] = {
-           isa: 'PBXBuildFile',
-           fileRef: fileRef,
-           settings: { ATTRIBUTES: ['CodeSignOnCopy'] }
-       };
+       const fileRef = proj.generateUuid(), buildFile = proj.generateUuid();
+       proj.hash.project.objects['PBXFileReference'][fileRef] = { isa: 'PBXFileReference', explicitFileType: '"wrapper.app-extension"', path: `"${appexName}"`, sourceTree: 'BUILT_PRODUCTS_DIR' };
+       proj.hash.project.objects['PBXBuildFile'][buildFile] = { isa: 'PBXBuildFile', fileRef: fileRef, settings: { ATTRIBUTES: ['CodeSignOnCopy'] } };
        proj.hash.project.objects['PBXCopyFilesBuildPhase'][embedPhaseKey].files.push({ value: buildFile, comment: appexName });
-       // Build Settings Fix for Extension Types
+       // Configs
        const configs = proj.pbxXCBuildConfigurationSection();
        Object.keys(configs).forEach(key => {
            const cfg = configs[key];
@@ -75,15 +66,15 @@ module.exports = function (context) {
                cfg.buildSettings.PRODUCT_BUNDLE_IDENTIFIER = ext.bundleId;
                cfg.buildSettings.DEVELOPMENT_TEAM = settings.teamID;
                cfg.buildSettings.SKIP_INSTALL = 'YES';
-               // THIS LINE ENSURES THE FOLDER IS TREATED AS AN EXTENSION (.appex)
                cfg.buildSettings['WRAPPER_EXTENSION'] = 'appex';
                cfg.buildSettings['CODE_SIGN_ENTITLEMENTS'] = `"${ext.name}/${ext.name}.entitlements"`;
                cfg.buildSettings['INFOPLIST_FILE'] = `"${ext.name}/${ext.name}-Info.plist"`;
+               cfg.buildSettings['SWIFT_VERSION'] = '5.0';
            }
        });
    });
    fs.writeFileSync(pbxprojPath, proj.writeSync());
-   console.log('✅ IPA folder structure forced with WRAPPER_EXTENSION=appex');
+   console.log('🎉 Tight configuration complete: Models and Logs included.');
    deferral.resolve();
    return deferral.promise;
 };
