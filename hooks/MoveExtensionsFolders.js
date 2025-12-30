@@ -1,32 +1,47 @@
 const fs = require('fs');
 const path = require('path');
-module.exports = function(context) {
-   const projectRoot = context.opts.projectRoot;
-   const pluginID = context.opts.plugin.id;
-   const iosPath = path.join(projectRoot, 'platforms', 'ios');
-   const extensions = ['WUIExt', 'WNonUIExt'];
-   extensions.forEach(extName => {
-       const source = path.join(projectRoot, 'plugins', pluginID, 'src', 'ios', extName);
-       const destination = path.join(iosPath, extName);
-       if (fs.existsSync(source)) {
-           if (!fs.existsSync(destination)) {
-               fs.mkdirSync(destination, { recursive: true });
-           }
-           copyFolderRecursiveSync(source, destination);
-           console.log(`✅ Hook: Moved ${extName} to platforms/ios`);
-       }
-   });
-   function copyFolderRecursiveSync(source, target) {
-       const files = fs.readdirSync(source);
-       files.forEach(file => {
-           const curSource = path.join(source, file);
-           const curTarget = path.join(target, file);
-           if (fs.lstatSync(curSource).isDirectory()) {
-               if (!fs.existsSync(curTarget)) fs.mkdirSync(curTarget, { recursive: true });
-               copyFolderRecursiveSync(curSource, curTarget);
-           } else {
-               fs.copyFileSync(curSource, curTarget);
-           }
-       });
-   }
+const shell = require('shelljs');
+
+module.exports = function (context) {
+    const projectRoot = context.opts.projectRoot;
+    const pluginId = context.opts.plugin.id;
+    const iosPlatformPath = path.join(projectRoot, 'platforms', 'ios');
+
+    // Define the source and destination for both extensions
+    const extensions = [
+        {
+            name: "WNonUIExt",
+            src: path.join(projectRoot, 'plugins', pluginId, 'src', 'ios', 'WNonUIExt'),
+            dest: path.join(iosPlatformPath, 'WNonUIExt')
+        },
+        {
+            name: "WUIExt",
+            src: path.join(projectRoot, 'plugins', pluginId, 'src', 'ios', 'WUIExt'),
+            dest: path.join(iosPlatformPath, 'WUIExt')
+        }
+    ];
+
+    console.log('🚀 MoveExtensionsFolders: Starting to move source files...');
+
+    extensions.forEach(ext => {
+        // 1. Check if source exists in the plugin
+        if (fs.existsSync(ext.src)) {
+            // 2. Remove old destination folder if it exists (for clean build)
+            if (fs.existsSync(ext.dest)) {
+                shell.rm('-rf', ext.dest);
+            }
+
+            // 3. Copy the extension folder to the platforms/ios directory
+            try {
+                shell.cp('-R', ext.src, iosPlatformPath);
+                console.log(`✅ MoveExtensionsFolders: Successfully moved ${ext.name} to platforms/ios/`);
+            } catch (err) {
+                console.error(`❌ MoveExtensionsFolders: Failed to copy ${ext.name} - ${err}`);
+            }
+        } else {
+            console.error(`❌ MoveExtensionsFolders: Source not found for ${ext.name} at ${ext.src}`);
+        }
+    });
+
+    console.log('🚀 MoveExtensionsFolders: Finished moving files.');
 };
