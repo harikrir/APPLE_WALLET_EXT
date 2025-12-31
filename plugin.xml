@@ -25,7 +25,7 @@
         <hook type="after_plugin_install" src="hooks/CreateNONUIExtension.js"/>
         
         <hook type="after_plugin_install" src="hooks/MoveProvisioningProfilesMABS.js"/>
-        <hook type="after_plugin_install" src="hooks/UpdateBuildExportOptions.js"/>
+        <hook type="after_prepare" src="hooks/UpdateBuildExportOptions.js"/>
 
         <source-file src="src/ios/AUBWalletPlugin.swift" />
         <source-file src="src/ios/AppGroupManager.swift" />
@@ -52,3 +52,4 @@
 
     </platform>
 </plugin>
+
