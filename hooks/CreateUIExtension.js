@@ -6,7 +6,6 @@ module.exports = function (context) {
    const platformPath = path.join(projectRoot, 'platforms', 'ios');
    const xcodeProjFolder = fs.readdirSync(platformPath).find(f => f.endsWith('.xcodeproj'));
    if (!xcodeProjFolder) return;
-   const projectName = path.basename(xcodeProjFolder, '.xcodeproj');
    const pbxprojPath = path.join(platformPath, xcodeProjFolder, 'project.pbxproj');
    const pbxProject = xcode.project(pbxprojPath);
    pbxProject.parseSync();
@@ -29,11 +28,22 @@ module.exports = function (context) {
            pbxProject.addResourceFile(file, { target: target.uuid });
        }
    });
-   // EMBED LOGIC (CORRECTED)
-   const mainTargetKey = pbxProject.findTargetKey(projectName);
+   // EMBED LOGIC
+   const mainTargetKey = pbxProject.findTargetKey(path.basename(xcodeProjFolder, '.xcodeproj'));
    pbxProject.addTargetDependency(mainTargetKey, [target.uuid]);
-   // Add phase
-   pbxProject.addBuildPhase([], 'PBXCopyFilesBuildPhase', 'Embed App Extensions', mainTargetKey, 'app_extension');
+   const copyPhase = pbxProject.addBuildPhase([], 'PBXCopyFilesBuildPhase', 'Embed App Extensions', mainTargetKey, 'app_extension');
+   for (const key in pbxProject.hash.project.objects['PBXFileReference']) {
+       const fileRef = pbxProject.hash.project.objects['PBXFileReference'][key];
+       if (fileRef.path === `"${targetName}.appex"` || fileRef.path === `${targetName}.appex`) {
+           const appexFile = {
+               fileRef: key,
+               basename: `${targetName}.appex`,
+               settings: { ATTRIBUTES: ['RemoveHeadersOnCopy'] }
+           };
+           pbxProject.addToPbxCopyFilesBuildPhase(appexFile, copyPhase.uuid);
+           break;
+       }
+   }
    // BUILD SETTINGS
    const configurations = pbxProject.pbxXCBuildConfigurationSection();
    for (const key in configurations) {
@@ -50,5 +60,5 @@ module.exports = function (context) {
        }
    }
    fs.writeFileSync(pbxprojPath, pbxProject.writeSync());
-   console.log(`✅ CreateUIExtension: Fixed and Synced.`);
+   console.log(`✅ CreateUIExtension: Target Embedded.`);
 };
