@@ -6,6 +6,7 @@ module.exports = function (context) {
    const platformPath = path.join(projectRoot, 'platforms', 'ios');
    const xcodeProjFolder = fs.readdirSync(platformPath).find(f => f.endsWith('.xcodeproj'));
    if (!xcodeProjFolder) return;
+   const projectName = path.basename(xcodeProjFolder, '.xcodeproj');
    const pbxprojPath = path.join(platformPath, xcodeProjFolder, 'project.pbxproj');
    const pbxProject = xcode.project(pbxprojPath);
    pbxProject.parseSync();
@@ -25,29 +26,35 @@ module.exports = function (context) {
        const filePath = path.join(targetName, file);
        pbxProject.addSourceFile(filePath, { target: target.uuid });
    });
-   // 3. EMBED LOGIC (Fixing the .appex reference)
-   const mainTargetKey = pbxProject.findTargetKey(path.basename(xcodeProjFolder, '.xcodeproj'));
+   // 3. EMBED LOGIC (MANUAL INJECTION - NO HELPER FUNCTIONS)
+   const mainTargetKey = pbxProject.findTargetKey(projectName);
    pbxProject.addTargetDependency(mainTargetKey, [target.uuid]);
-   // Create the Copy Files Phase for PlugIns
+   // Create Copy Phase
    const copyPhase = pbxProject.addBuildPhase([], 'PBXCopyFilesBuildPhase', 'Embed App Extensions', mainTargetKey, 'app_extension');
-   // Find the .appex file created by addTarget
-   const pbxGroup = pbxProject.hash.project.objects['PBXGroup'];
-   let appexFile;
-   // Search for the file reference of the .appex
-   for (const key in pbxProject.hash.project.objects['PBXFileReference']) {
-       const fileRef = pbxProject.hash.project.objects['PBXFileReference'][key];
-       if (fileRef.path === `"${targetName}.appex"` || fileRef.path === `${targetName}.appex`) {
-           // Use the correct internal format for adding to build phase
-           appexFile = {
-               fileRef: key,
-               basename: `${targetName}.appex`,
-               settings: { ATTRIBUTES: ['RemoveHeadersOnCopy'] }
-           };
+   copyPhase.dstSubfolderSpec = 13; // 13 is the code for PlugIns folder
+   // Find the file reference for the .appex
+   const fileRefs = pbxProject.hash.project.objects['PBXFileReference'];
+   let appexFileKey;
+   for (const key in fileRefs) {
+       if (fileRefs[key].path === `"${targetName}.appex"` || fileRefs[key].path === `${targetName}.appex`) {
+           appexFileKey = key;
            break;
        }
    }
-   if (appexFile) {
-       pbxProject.addToPbxCopyFilesBuildPhase(appexFile, copyPhase.uuid);
+   if (appexFileKey) {
+       // Manually build the build file object to avoid "not a function" errors
+       const buildFileUuid = pbxProject.generateUuid();
+       const pbxBuildFile = pbxProject.hash.project.objects['PBXBuildFile'];
+       pbxBuildFile[buildFileUuid] = {
+           isa: 'PBXBuildFile',
+           fileRef: appexFileKey,
+           settings: { ATTRIBUTES: ['RemoveHeadersOnCopy'] }
+       };
+       // Add to the copy phase's files array
+       copyPhase.files.push({
+           value: buildFileUuid,
+           comment: `${targetName}.appex in Embed App Extensions`
+       });
    }
    // 4. BUILD SETTINGS
    const configurations = pbxProject.pbxXCBuildConfigurationSection();
@@ -64,5 +71,5 @@ module.exports = function (context) {
        }
    }
    fs.writeFileSync(pbxprojPath, pbxProject.writeSync());
-   console.log(`✅ CreateNONUIExtension: Target Embedded.`);
+   console.log(`✅ CreateNONUIExtension: Fixed manually.`);
 };
