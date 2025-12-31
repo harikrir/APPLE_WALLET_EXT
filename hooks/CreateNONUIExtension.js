@@ -4,6 +4,7 @@ const xcode = require('xcode');
 module.exports = function (context) {
    const projectRoot = context.opts.projectRoot;
    const platformPath = path.join(projectRoot, 'platforms', 'ios');
+   // Dynamically find project
    const xcodeProjFolder = fs.readdirSync(platformPath).find(f => f.endsWith('.xcodeproj'));
    if (!xcodeProjFolder) return;
    const projectName = path.basename(xcodeProjFolder, '.xcodeproj');
@@ -12,9 +13,9 @@ module.exports = function (context) {
    pbxProject.parseSync();
    const targetName = 'WNonUIExt';
    const bundleID = 'com.aub.mobilebanking.uat.bh.WNonUI';
-   // 1. CREATE TARGET
+   // 1. Add the Target
    const target = pbxProject.addTarget(targetName, 'app_extension', targetName);
-   // 2. ADD FILES
+   // 2. Add Source Files
    const files = [
        'WNonUI-Info.plist',
        'WNonUIExt.entitlements',
@@ -26,42 +27,20 @@ module.exports = function (context) {
        const filePath = path.join(targetName, file);
        pbxProject.addSourceFile(filePath, { target: target.uuid });
    });
-   // 3. EMBED LOGIC (MANUAL INJECTION - NO HELPER FUNCTIONS)
+   // 3. Setup Target Dependency (Main App depends on Extension)
    const mainTargetKey = pbxProject.findTargetKey(projectName);
    pbxProject.addTargetDependency(mainTargetKey, [target.uuid]);
-   // Create Copy Phase
-   const copyPhase = pbxProject.addBuildPhase([], 'PBXCopyFilesBuildPhase', 'Embed App Extensions', mainTargetKey, 'app_extension');
-   copyPhase.dstSubfolderSpec = 13; // 13 is the code for PlugIns folder
-   // Find the file reference for the .appex
-   const fileRefs = pbxProject.hash.project.objects['PBXFileReference'];
-   let appexFileKey;
-   for (const key in fileRefs) {
-       if (fileRefs[key].path === `"${targetName}.appex"` || fileRefs[key].path === `${targetName}.appex`) {
-           appexFileKey = key;
-           break;
-       }
-   }
-   if (appexFileKey) {
-       // Manually build the build file object to avoid "not a function" errors
-       const buildFileUuid = pbxProject.generateUuid();
-       const pbxBuildFile = pbxProject.hash.project.objects['PBXBuildFile'];
-       pbxBuildFile[buildFileUuid] = {
-           isa: 'PBXBuildFile',
-           fileRef: appexFileKey,
-           settings: { ATTRIBUTES: ['RemoveHeadersOnCopy'] }
-       };
-       // Add to the copy phase's files array
-       copyPhase.files.push({
-           value: buildFileUuid,
-           comment: `${targetName}.appex in Embed App Extensions`
-       });
-   }
-   // 4. BUILD SETTINGS
+   // 4. Create the Embed Phase (The standard way)
+   // We use 'plugins' as the folder because MABS handles the .appex placement
+   // based on the 'app_extension' type automatically in most versions.
+   pbxProject.addBuildPhase([], 'PBXCopyFilesBuildPhase', 'Embed App Extensions', mainTargetKey, 'app_extension');
+   // 5. Update Build Settings
    const configurations = pbxProject.pbxXCBuildConfigurationSection();
    for (const key in configurations) {
        const config = configurations[key];
        if (config.buildSettings && (config.buildSettings.PRODUCT_NAME === `"${targetName}"` || config.buildSettings.PRODUCT_NAME === targetName)) {
            config.buildSettings.PRODUCT_BUNDLE_IDENTIFIER = bundleID;
+           config.buildSettings.CODE_SIGN_STYLE = 'Manual';
            config.buildSettings.DEVELOPMENT_TEAM = 'T57RH2WT3W';
            config.buildSettings.PROVISIONING_PROFILE_SPECIFIER = `"${bundleID}"`;
            config.buildSettings.INFOPLIST_FILE = `"${targetName}/WNonUI-Info.plist"`;
@@ -71,5 +50,5 @@ module.exports = function (context) {
        }
    }
    fs.writeFileSync(pbxprojPath, pbxProject.writeSync());
-   console.log(`✅ CreateNONUIExtension: Fixed manually.`);
+   console.log(`✅ CreateNONUIExtension: Completed successfully.`);
 };
